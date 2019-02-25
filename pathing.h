@@ -56,15 +56,32 @@ void dijkstra(struct dungeon *rlg, int dist[HEIGHT][WIDTH], int weight[HEIGHT][W
 	}
       }
     }
-  } 
+  }
+  //normalize map, set unreachables to negative numbers
+  for(int i = 0; i < HEIGHT; i++){
+    for(int j = 0; j < WIDTH; j++){
+      if(dist[i][j] == 17469 * -2 || dist[i][j] == 17469) dist[i][j] = -2;
+      if(dist[i][j] == -17469) dist[i][j] = -1;
+    }
+  }
 }
 
+void generate_paths(struct dungeon *rlg){
+  int weight[HEIGHT][WIDTH];
+  //make nontunneling path
+  weight_nontunnel(rlg, weight);
+  dijkstra(rlg, rlg->nt_path, weight);
+  print_path(rlg->nt_path);
+  //make tunneling path
+  weight_tunnel(rlg, weight);
+  dijkstra(rlg, rlg->t_path, weight);
+}
 
 void print_path(int path[HEIGHT][WIDTH]){
   for(int i = 0; i < HEIGHT; i++){
     for(int j = 0; j < WIDTH; j++){
-      if(path[i][j] == 17469 || path[i][j] == -2 * 17469) printf("X");
-      else if(path[i][j] < 0) printf(" ");
+      if(path[i][j] == -2) printf("X"); //unreachable
+      else if(path[i][j] < 0) printf(" "); //unmineable (non-tunneling only)
       else if(path[i][j] == 0) printf("@");
       else printf("%d", path[i][j] % 10);
     }
