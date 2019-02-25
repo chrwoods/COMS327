@@ -229,3 +229,10 @@ void print_map(struct dungeon *rlg){
     printf("\n");
   }
 }
+
+void empty_map(struct dungeon *rlg){
+  free(rlg->rooms);
+  free(rlg->up);
+  free(rlg->down);
+  free(rlg);
+}
