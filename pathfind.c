@@ -15,11 +15,11 @@ int main(int argc, char *argv[]){
   int weight[HEIGHT][WIDTH];
   int dist[HEIGHT][WIDTH];
   weight_nontunnel(rlg, weight);
-  dijkstra(rlg, dist, weight);
-  print_path(dist);
+  dijkstra(rlg, rlg->nt_path, weight);
+  print_path(rlg->nt_path);
   weight_tunnel(rlg, weight);
-  dijkstra(rlg, dist, weight);
-  print_path(dist);
+  dijkstra(rlg, rlg->t_path, weight);
+  print_path(rlg->t_path);
   //deallocate memory
   free((*rlg).rooms);
   free((*rlg).up);
