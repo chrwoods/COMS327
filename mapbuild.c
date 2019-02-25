@@ -40,8 +40,5 @@ int main(int argc, char *argv[]){
   }
   if(save) save_map(filepath, rlg);
   print_map(rlg);
-  free((*rlg).rooms);
-  free((*rlg).up);
-  free((*rlg).down);
-  free(rlg);
+  empty_map(rlg);
 }
