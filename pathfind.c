@@ -13,7 +13,6 @@ int main(int argc, char *argv[]){
   //print_hex_map(rlg);
   //print_path((*rlg).map);
   int weight[HEIGHT][WIDTH];
-  int dist[HEIGHT][WIDTH];
   weight_nontunnel(rlg, weight);
   dijkstra(rlg, rlg->nt_path, weight);
   print_path(rlg->nt_path);
