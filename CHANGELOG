@@ -1,0 +1,17 @@
+Changelog for assignment 1.01:
+
+01/30/2019 - began map generator, completed function allowing for seeding and room generation
+
+02/01/2019 - finished map generator, completed initial corridor building function which would just connect room 1 with 2, room 2 with 3, and continue until all rooms were connected. This scrapped and replaced with a new method that calculated euclidean distances between each room to pick where corridors go, making map a lot cleaner. Also added a line at the bottom that prints out the seed used (even if a seed is given when the program is run), and added up and down staircases. Also added hardness values in the map in preparation for the second assignment.
+
+02/05/2019 - added flag detection for mapgen.c, with "--save", "--load", and "--seed <seed number>". Began work on save_map and load_map functions.
+
+02/07/2019 - almost completed saving and loading functions, had error with room pointer however writing and reading format is completed. obj struct was added with a col and a row field to give the position of the object, which can be either a staircase or the player character. Added placement of the character with the '@' symbol, and fixed a bug where the position of the player character wasn't being written to the file, so the entire file became byte shifted by two.
+
+02/08/2019 - fixed rooms pointer array to allocate in main function and reallocate based on number of rooms in the respective functions. fixed bug where filename was being concatenated twice, so saving and loading would give a seg fault. Changed load_map function to output a pointer to the room array to fix strange bug where rooms would be zero. Removed debug statements and updated README file.
+
+02/14/2019 - completely restructured entire codebase. moved all defined constants and structs into a header named "structs.h". Moved all map generation functions into header "mapgen.h", and moved loading and saving functions into header "mapsl.h". Also created struct "dungeon" containing the map grid, the rooms, the stairs, and the player character, essentially making this into more of an object-oriented program. This complete restructure allows for reusing functions in other programs, making everything much more convenient, and will make the inevitable conversion to C++ much easier. Updated makefile accordingly.
+
+02/15/2019 - began building priorityq.h and pathing.h which are a min priority queue and a header containing the functions to implement pathing, respectively. Methods to make weighting for a non-tunneling monster, printing out the path modulo 10, and to run Dijkstra's method were all implemented. Priority queue had issues.
+
+02/20/2019 - finally fixed issue with priority queue after multiple days, inserting with prioirity had problem where nodes were being swapped but previous nodes were not being changed. Tunneling weighting function was added to pathing.h and a few extra bugs were squashed, allowing pathing to fully work. Functionality to make unreachable nodes display an 'X' was added, and one file called "mapandpath.c" was built to contain all features as of yet. All memory leaks were eliminated. Makefile and README were updated accordingly for submission. And perhaps most important change was made so far, where all instances of word "tunnelling" was replaced with "tunneling" because apparently I was spelling it wrong.
