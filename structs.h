@@ -5,6 +5,7 @@
 #include <math.h>
 #include <time.h>
 #include <endian.h>
+#include <unistd.h>
 #define WIDTH 80
 #define HEIGHT 21
 #define MIN_ROOMS 6
@@ -12,10 +13,10 @@
 #define MIN_ROOM_HEIGHT 3 
 #define DEFAULT_MONSTERS 10
 #define PC_SPEED 10
-#define MON_SMART 0x1
-#define MON_TELEPATHIC 0x2
-#define MON_TUNNEL 0x4
-#define MON_ERRATIC 0x8
+#define MON_SMART 1
+#define MON_TELEPATHIC 2
+#define MON_TUNNEL 4
+#define MON_ERRATIC 8
 
 struct room {
   uint8_t row;
