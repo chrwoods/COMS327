@@ -71,7 +71,6 @@ void generate_paths(struct dungeon *rlg){
   //make nontunneling path
   weight_nontunnel(rlg, weight);
   dijkstra(rlg, rlg->nt_path, weight);
-  print_path(rlg->nt_path);
   //make tunneling path
   weight_tunnel(rlg, weight);
   dijkstra(rlg, rlg->t_path, weight);
