@@ -35,6 +35,8 @@ struct monster {
 
 struct dungeon {
   uint8_t map[HEIGHT][WIDTH];
+  int nt_path[HEIGHT][WIDTH];
+  int t_path[HEIGHT][WIDTH];
   int num_rooms;
   struct room *rooms;
   int num_up;
