@@ -26,8 +26,63 @@ int line_of_sight(struct dungeon *rlg, int num){
   }
   return 1;
 }
+
+void kill_monster(struct dungeon *rlg, int num){
+  if(rlg->num_monsters == 0){
+    printf("No monsters left.\n"); 
+    return;
+  }
+  if(num >= rlg->num_monsters){
+    printf("Trying to kill a nonexistent monster.\n");
+    return;
+  }
+  if(rlg->num_monsters == 1){
+    rlg->num_monsters = 0;
+    free(rlg->monsters);
+    return;
+  }
+  if(rlg->num_monsters - 1 == num){
+    rlg->num_monsters--;
+    rlg->monsters = realloc(rlg->monsters, rlg->num_monsters * sizeof(struct monster));
+    return;
+  }
+  rlg->num_monsters--;
+  (rlg->monsters)[num].row = (rlg->monsters)[rlg->num_monsters].row;
+  (rlg->monsters)[num].col = (rlg->monsters)[rlg->num_monsters].col;
+  (rlg->monsters)[num].type = (rlg->monsters)[rlg->num_monsters].type;
+  (rlg->monsters)[num].speed = (rlg->monsters)[rlg->num_monsters].speed;
+  (rlg->monsters)[num].pc_row = (rlg->monsters)[rlg->num_monsters].pc_row;
+  (rlg->monsters)[num].pc_col = (rlg->monsters)[rlg->num_monsters].pc_col;
+  rlg->monsters = realloc(rlg->monsters, rlg->num_monsters * sizeof(struct monster));
+}
+
+void move_pc(struct dungeon *rlg){
+  //meander
+  while(1){
+    int v_dir = (rand() % 3) - 1;
+    int h_dir = (rand() % 3) - 1;
+    if(v_dir == 0 && h_dir == 0) continue;
+    uint8_t row = rlg->pc.row + v_dir;
+    uint8_t col = rlg->pc.col + h_dir;
+    if(rlg->map[row][col] != 0) continue;
+    rlg->pc.row = row;
+    rlg->pc.col = col;
+    //unalive the monsters
+    for(int i = 0; i < rlg->num_monsters; i++){
+      if((rlg->monsters)[i].row == row && (rlg->monsters)[i].col == col){
+	kill_monster(rlg, i); //FATALITY
+	i--; //technically we can break here, but this checks for monster overlap just in case
+      }
+    }
+    break;
+  }
+}
   
-void move(struct dungeon *rlg, int num){
+int move(struct dungeon *rlg, int num){
+  if(num < 0){//move player
+    move_pc(rlg);
+    return 0;
+  }
   //decide where to move
   if(((rlg->monsters)[num].type & MON_TELEPATHIC) == MON_TELEPATHIC){
     (rlg->monsters)[num].pc_row = rlg->pc.row;
@@ -72,11 +127,13 @@ void move(struct dungeon *rlg, int num){
       if(neighbors[i / 3][i % 3] < shortest_dist && neighbors[i / 3][i % 3] >= 0){
 	shortest_dist = neighbors[i / 3][i % 3];
 	destination = i;
+      } else if (neighbors[i / 3][i % 3] == shortest_dist && (i / 3 == 1 || i % 3 == 1)){ //tries to move horizontally instead of diagonally so it doesn't look weird
+	destination = i;
       }
     }
   } else if((rlg->monsters)[num].pc_row + (rlg->monsters)[num].pc_col > 0){ //if there is a stored PC location
-    int v_dist = row - (rlg->monsters)[num].pc_row;
-    int h_dist = col - (rlg->monsters)[num].pc_col;
+    int v_dist = (rlg->monsters)[num].pc_row - row;
+    int h_dist = (rlg->monsters)[num].pc_col - col;
     int v_dir = 0;
     int h_dir = 0;
     if(v_dist != 0) v_dir = abs(v_dist)/v_dist; //gets sign
@@ -114,5 +171,18 @@ void move(struct dungeon *rlg, int num){
   if(rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] == 0){
     (rlg->monsters)[num].row += (destination / 3) - 1;
     (rlg->monsters)[num].col += (destination % 3) - 1;
+    row = (rlg->monsters)[num].row;
+    col = (rlg->monsters)[num].col;
+    //check combat
+    if(row == rlg->pc.row && col == rlg->pc.col) return 1; //the player has been killed
+    for(int i = 0; i < rlg->num_monsters; i++){
+      if(num == i) continue;
+      if((rlg->monsters)[i].row == row && (rlg->monsters)[i].col == col){
+	kill_monster(rlg, i); //FATALITY
+	i--; //technically we can break here, but this checks for monster overlap just in case
+      }
+    }
   }
+  return 0;
 }
+
