@@ -3,6 +3,7 @@
 #include "mapsl.h"
 #include "pathing.h"
 #include "danger.h"
+#include <unistd.h>
 
 int main(int argc, char *argv[]){
   struct dungeon *rlg = malloc(sizeof(struct dungeon));
@@ -50,12 +51,12 @@ int main(int argc, char *argv[]){
   //print tunneling path
   //print_path(rlg->t_path);
   //make monsters
-  rlg->num_monsters = 1;
-  //rlg->num_monsters = DEFAULT_MONSTERS;
+  //rlg->num_monsters = 1;
+  rlg->num_monsters = DEFAULT_MONSTERS;
   rlg->monsters = malloc(rlg->num_monsters * sizeof(struct monster));
   for(int i = 0; i < rlg->num_monsters; i++){
     generate_monster(rlg, i);
-    (rlg->monsters)[i].type = 7;
+    //(rlg->monsters)[i].type = 7;
     /*printf("Monster %d is type %d and:\n", i, (rlg->monsters)[i].type);
     char *spacenot[2] = {"", "not "};
     int yesno;
@@ -76,7 +77,7 @@ int main(int argc, char *argv[]){
   print_map(rlg);
   //move monsters like 20 times
   for(int n = 0; n < 20; n++){
-    //usleep(250000);
+    usleep(250000);
     for(int i = 0; i < rlg->num_monsters; i++){
       move(rlg, i);
     }
