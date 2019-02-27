@@ -12,6 +12,10 @@
 #define MIN_ROOM_HEIGHT 3 
 #define DEFAULT_MONSTERS 10
 #define PC_SPEED 10
+#define MON_SMART 0x1
+#define MON_TELEPATHIC 0x2
+#define MON_TUNNEL 0x4
+#define MON_ERRATIC 0x8
 
 struct room {
   uint8_t row;
@@ -28,7 +32,8 @@ struct obj {
 struct monster {
   uint8_t row;
   uint8_t col;
-  uint8_t info;
+  uint8_t type;
+  uint8_t speed;
   uint8_t pc_row;
   uint8_t pc_col;
 };
