@@ -2,6 +2,7 @@
 #include "mapgen.h"
 #include "mapsl.h"
 #include "pathing.h"
+#include "danger.h"
 
 int main(int argc, char *argv[]){
   struct dungeon *rlg = malloc(sizeof(struct dungeon));
@@ -41,16 +42,48 @@ int main(int argc, char *argv[]){
   }
   if(save) save_map(filepath, rlg);
   //print normal map
-  print_map(rlg);
-  int weight[HEIGHT][WIDTH];
+  //print_map(rlg);
+  //make paths
+  generate_paths(rlg);
   //print nontunneling path
-  weight_nontunnel(rlg, weight);
-  dijkstra(rlg, rlg->nt_path, weight);
-  print_path(rlg->nt_path);
+  //print_path(rlg->nt_path);
   //print tunneling path
-  weight_tunnel(rlg, weight);
-  dijkstra(rlg, rlg->t_path, weight);
-  print_path(rlg->t_path);
+  //print_path(rlg->t_path);
+  //make monsters
+  rlg->num_monsters = 1;
+  //rlg->num_monsters = DEFAULT_MONSTERS;
+  rlg->monsters = malloc(rlg->num_monsters * sizeof(struct monster));
+  for(int i = 0; i < rlg->num_monsters; i++){
+    generate_monster(rlg, i);
+    (rlg->monsters)[i].type = 7;
+    /*printf("Monster %d is type %d and:\n", i, (rlg->monsters)[i].type);
+    char *spacenot[2] = {"", "not "};
+    int yesno;
+    if((rlg->monsters)[i].type & MON_SMART == MON_SMART) yesno = 0;
+    else yesno = 1;
+    printf("It is %ssmart. Constant %d. Bitwise %d. Equal? %d.\n", spacenot[yesno], MON_SMART, (rlg->monsters)[i].type & MON_SMART, (rlg->monsters)[i].type & MON_SMART == MON_SMART);
+    if(((rlg->monsters)[i].type & MON_TELEPATHIC) == MON_TELEPATHIC) yesno = 0;
+    else yesno = 1;
+    printf("It is %stelepathic. Constant %d. Bitwise %d. Equal? %d.\n", spacenot[yesno], MON_TELEPATHIC, (rlg->monsters)[i].type & MON_TELEPATHIC, ((rlg->monsters)[i].type & MON_TELEPATHIC) == MON_TELEPATHIC);
+    if(((rlg->monsters)[i].type & MON_TUNNEL) == MON_TUNNEL) yesno = 0;
+    else yesno = 1;
+    printf("It is %stunneling.\n", spacenot[yesno]);
+    if((rlg->monsters)[i].type & MON_ERRATIC == MON_ERRATIC) yesno = 0;
+    else yesno = 1;
+    printf("It is %serratic.\n", spacenot[yesno]);*/
+  }
+  //print map
+  print_map(rlg);
+  //move monsters like 20 times
+  for(int n = 0; n < 20; n++){
+    //usleep(250000);
+    for(int i = 0; i < rlg->num_monsters; i++){
+      move(rlg, i);
+    }
+    print_map(rlg);
+  }
+  //print map
+  //print_map(rlg);
   //deallocate memory
   empty_map(rlg);
 }
