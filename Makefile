@@ -1,4 +1,7 @@
-all: mapandpath mapbuild pathfind
+all: monstermap mapandpath mapbuild pathfind
+
+monstermap: monstermap.c
+	gcc monstermap.c -o monstermap -lm
 
 mapandpath: mapandpath.c
 	gcc mapandpath.c -o mapandpath -lm
@@ -10,4 +13,4 @@ pathfind: pathfind.c
 	gcc pathfind.c -o pathfind -lm
 
 clean:
-	rm -f mapandpath mapbuild pathfind *~
+	rm -f monstermap mapandpath mapbuild pathfind *~
