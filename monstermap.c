@@ -66,13 +66,17 @@ int main(int argc, char *argv[]){
   print_map(rlg);
   //move until the player is dead, probably (or the PC can win)
   int gamestate = 0;
-  for(int n = 0; n < 30; n++){
+  while(gamestate == 0){
     usleep(250000);
-    for(int i = 0; i < rlg->num_monsters; i++){
-      move(rlg, i);
+    for(int i = -1; i < rlg->num_monsters; i++){
+      gamestate = move(rlg, i);
+      if(gamestate == 1) break;
     }
+    if(rlg->num_monsters == 0) gamestate = 2;
     print_map(rlg);
   }
+  if(gamestate == 2) printf("You win!\n");
+  else if(gamestate == 1) printf("You lose.\n");
   //deallocate memory
   empty_map(rlg);
 }
