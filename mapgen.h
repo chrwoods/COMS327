@@ -224,6 +224,7 @@ void print_map(struct dungeon *rlg){
   //place monsters
   char monstersyms[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
   for(int i = 0; i < rlg->num_monsters; i++){
+    if((rlg->monsters)[i].speed == 0) continue; //dead monster
     chargrid[(rlg->monsters)[i].row][(rlg->monsters)[i].col] = monstersyms[(rlg->monsters)[i].type];
   }
   //print the character grid
