@@ -83,4 +83,13 @@ void pq_pop(struct pq_queue *q, void *data, int *priority){
   q->num_nodes--;
 }
 
+void pq_peek(struct pq_queue *q, void *data, int *priority){
+  if(q->num_nodes <= 0){
+    printf("Error: Trying to peek at an empty queue.\n");
+    return;
+  }
+  memcpy(data, (q->first)->data, q->mem_size);
+  *priority = (q->first)->priority;
+}
+
 //void pq_empty(struct pq_queue *q);
