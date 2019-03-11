@@ -7,7 +7,6 @@
 #include "ascii.h"
 
 int main(int argc, char *argv[]){
-  drats();
   struct dungeon *rlg = malloc(sizeof(struct dungeon));
   int seed = -1; //negative seed = random
   int save = 0;
@@ -66,6 +65,7 @@ int main(int argc, char *argv[]){
     generate_monster(rlg, i);
   }
   //print map
+  drats();
   print_map(rlg);
   //move until the player is dead, probably (or the PC can win)
   int gamestate = 0;
