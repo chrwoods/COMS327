@@ -5,7 +5,7 @@ void generate_monster(struct dungeon *rlg, int num){
     uint8_t row = rand() % HEIGHT;
     uint8_t col = rand() % WIDTH;
     if(rlg->map[row][col] != 0) continue;
-    if(rlg->pc.row == row && rlg->pc.col) continue;
+    if(rlg->pc.row == row && rlg->pc.col == col) continue;
     (rlg->monsters)[num].row = row;
     (rlg->monsters)[num].col = col;
     break;
@@ -27,7 +27,7 @@ int line_of_sight(struct dungeon *rlg, int num){
   return 1;
 }
 
-void kill_monster(struct dungeon *rlg, int num){
+/*void kill_monster(struct dungeon *rlg, int num){
   if(rlg->num_monsters == 0){
     printf("No monsters left.\n"); 
     return;
@@ -54,6 +54,10 @@ void kill_monster(struct dungeon *rlg, int num){
   (rlg->monsters)[num].pc_row = (rlg->monsters)[rlg->num_monsters].pc_row;
   (rlg->monsters)[num].pc_col = (rlg->monsters)[rlg->num_monsters].pc_col;
   rlg->monsters = realloc(rlg->monsters, rlg->num_monsters * sizeof(struct monster));
+}*/
+
+void kill_monster(struct dungeon *rlg, int num){
+  (rlg->monsters)[num].speed = 0;
 }
 
 void move_pc(struct dungeon *rlg){
@@ -71,7 +75,7 @@ void move_pc(struct dungeon *rlg){
     for(int i = 0; i < rlg->num_monsters; i++){
       if((rlg->monsters)[i].row == row && (rlg->monsters)[i].col == col){
 	kill_monster(rlg, i); //FATALITY
-	i--; //technically we can break here, but this checks for monster overlap just in case
+	//i--; //technically we can break here, but this checks for monster overlap just in case
       }
     }
     break;
@@ -179,7 +183,7 @@ int move(struct dungeon *rlg, int num){
       if(num == i) continue;
       if((rlg->monsters)[i].row == row && (rlg->monsters)[i].col == col){
 	kill_monster(rlg, i); //FATALITY
-	i--; //technically we can break here, but this checks for monster overlap just in case
+	//i--; //technically we can break here, but this checks for monster overlap just in case
       }
     }
   }
