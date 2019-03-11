@@ -1,3 +1,6 @@
+ncursed: ncursed.c
+	gcc ncursed.c -o ncursed -lm -lncurses
+
 all: monstermap mapandpath mapbuild pathfind
 
 monstermap: monstermap.c
@@ -13,4 +16,4 @@ pathfind: pathfind.c
 	gcc pathfind.c -o pathfind -lm
 
 clean:
-	rm -f monstermap mapandpath mapbuild pathfind *~
+	rm -f ncursed monstermap mapandpath mapbuild pathfind *~
