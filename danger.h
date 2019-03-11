@@ -96,6 +96,7 @@ void move_pc(struct dungeon *rlg){
     }
     break;
   }
+  generate_paths(rlg); //generate paths for new PC location
 }
   
 int move(struct dungeon *rlg, int num){
