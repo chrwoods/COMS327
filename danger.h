@@ -99,7 +99,7 @@ void move_pc(struct dungeon *rlg){
   generate_paths(rlg); //generate paths for new PC location
 }
   
-int move(struct dungeon *rlg, int num){
+int move_monster(struct dungeon *rlg, int num){
   if(num < 0){//move player
     move_pc(rlg);
     return 0;
@@ -206,4 +206,63 @@ int move(struct dungeon *rlg, int num){
   }
   return 0;
 }
+
+void print_monster_list(struct dungeon *rlg){
+  clear();
+  int col = 17;
+  mvprintw(0, col, "                           _                ");
+  mvprintw(1, col, "                          | |               ");
+  mvprintw(2, col, " _ __ ___   ___  _ __  ___| |_ ___ _ __ ___ ");
+  mvprintw(3, col, "| \'_ ` _ \\ / _ \\| \'_ \\/ __| __/ _ \\ \'__/ __|");
+  mvprintw(4, col, "| | | | | | (_) | | | \\__ \\ ||  __/ |  \\__ \\");
+  mvprintw(5, col, "|_| |_| |_|\\___/|_| |_|___/\\__\\___|_|  |___/");
+  col += 6;
+  mvprintw(7, col, "+------------------------------+");
+  mvprintw(8, col, "|                              |");
+  mvprintw(21, col, "+------------------------------+");
+  int list_start = 0;
+  char key;
+  int alive_monsters = 0;
+  int monster_array_locs[rlg->num_monsters];
+  for(int i = 0; i < rlg->num_monsters; i++){
+    if((rlg->monsters)[i].speed != 0) monster_array_locs[alive_monsters++] = i;
+  }
+  do{
+    for(int i = 0; i < 6; i++){
+      if(list_start + i >= alive_monsters){
+	mvprintw(9 + i * 2, col, "|                              |");
+	mvprintw(10 + i * 2, col, "|                              |");
+	continue;
+      }
+      int num = monster_array_locs[list_start + i];
+      char vert[6] = "north";
+      char horz[5] = "east";
+      int v_dist = rlg->pc.row - (rlg->monsters)[num].row;
+      int h_dist = (rlg->monsters)[num].col - rlg->pc.col;
+      if(v_dist < 0) {
+	v_dist *= -1;
+	vert[0] = 's';
+	vert[2] = 'u';
+      }
+      if(h_dist < 0) {
+	h_dist *= -1;
+	horz[0] = 'w';
+	horz[1] = 'e';
+      }
+      mvprintw(9 + i * 2, col, "|     %x, %2d %s, %2d %s     |",
+	       (rlg->monsters)[num].type, v_dist, vert, h_dist, horz);
+      mvprintw(10 + i * 2, col, "|                              |");
+    }
+    refresh();
+    key = getch();
+    if(key == KEY_DOWN && (list_start + 6 < alive_monsters)) list_start += 6;
+    if(key == KEY_UP && (list_start - 6 > 0)) list_start -= 6;
+  }while(key != 27); //27 = escape key (also is alt key, which will also close monster list)
+  clear();
+  print_map(rlg);
+  refresh;
+}
+    
+    
+  
 
