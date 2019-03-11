@@ -219,22 +219,23 @@ void print_monster_list(struct dungeon *rlg){
   col += 6;
   mvprintw(7, col, "+------------------------------+");
   mvprintw(8, col, "|                              |");
-  mvprintw(21, col, "+------------------------------+");
-  int list_start = 0;
-  char key;
+  mvprintw(22, col, "+------------------------------+");
+  int key;
   int alive_monsters = 0;
   int monster_array_locs[rlg->num_monsters];
   for(int i = 0; i < rlg->num_monsters; i++){
     if((rlg->monsters)[i].speed != 0) monster_array_locs[alive_monsters++] = i;
   }
+  int page = 0;
+  int num_pages = alive_monsters / 6 + (alive_monsters % 6 > 0);
   do{
     for(int i = 0; i < 6; i++){
-      if(list_start + i >= alive_monsters){
+      if(page * 6 + i >= alive_monsters){
 	mvprintw(9 + i * 2, col, "|                              |");
 	mvprintw(10 + i * 2, col, "|                              |");
 	continue;
       }
-      int num = monster_array_locs[list_start + i];
+      int num = monster_array_locs[page * 6 + i];
       char vert[6] = "north";
       char horz[5] = "east";
       int v_dist = rlg->pc.row - (rlg->monsters)[num].row;
@@ -253,10 +254,11 @@ void print_monster_list(struct dungeon *rlg){
 	       (rlg->monsters)[num].type, v_dist, vert, h_dist, horz);
       mvprintw(10 + i * 2, col, "|                              |");
     }
+    mvprintw(21, col, "|           %4d/%-4d          |", page + 1, num_pages);
     refresh();
     key = getch();
-    if(key == KEY_DOWN && (list_start + 6 < alive_monsters)) list_start += 6;
-    if(key == KEY_UP && (list_start - 6 > 0)) list_start -= 6;
+    if(key == KEY_DOWN && (page < num_pages - 1)) page++;
+    if(key == KEY_UP && (page > 0)) page--;
   }while(key != 27); //27 = escape key (also is alt key, which will also close monster list)
   clear();
   print_map(rlg);
