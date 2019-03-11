@@ -70,6 +70,7 @@ int main(int argc, char *argv[]){
   /*while(gamestate == 0){
     usleep(250000);
     for(int i = -1; i < rlg->num_monsters; i++){
+      if(i >= 0) if(rlg->monsters[i].speed == 0) continue;
       gamestate = move(rlg, i);
       if(gamestate == 1){
 	print_map(rlg);
@@ -81,7 +82,6 @@ int main(int argc, char *argv[]){
   }*/
   struct pq_queue q;
   pq_init(&q, sizeof(int));
-  q.num_nodes = 0;
   int negative1 = -1; //don't laugh at this line please
   pq_add(&q, &negative1, floor(1000/PC_SPEED));
   for(int i = 0; i < rlg->num_monsters; i++){
@@ -91,6 +91,16 @@ int main(int argc, char *argv[]){
   while(gamestate == 0){
     int num;
     int turn;
+
+    /*struct pq_node *node = q.first;
+    printf("Printing queue.\n");
+    while(node != 0){
+      printf("Found %d, %d.\n", *(int*)(node->data), node->priority);
+      if(*(int*)(node->data) >= 0) printf("Speed here is %d.\n", (rlg->monsters)[*(int*)(node->data)].speed);
+      node = node->next;
+    }*/
+
+    
     pq_pop(&q, &num, &turn);
     //printf("Popped %d with turn %d.\n", num, turn);
     //printf("Num nodes is %d.\n", q.num_nodes);
@@ -99,7 +109,10 @@ int main(int argc, char *argv[]){
       if((rlg->monsters)[num].speed == 0) continue; //dead monster, do not add back to queue
     }
     gamestate = move(rlg, num);
-    if(gamestate == 1) break;
+    if(gamestate == 1){
+      print_map(rlg);
+      break;
+    }
     if(num < 0){
       gamestate = 2;
       for(int i = 0; i < rlg->num_monsters; i++){
@@ -113,6 +126,8 @@ int main(int argc, char *argv[]){
       print_map(rlg);
       usleep(250000);
     } else {
+      //printf("Found turn %d, changing to %d.\n", turn, turn + 1000/((rlg->monsters)[num].speed));
+      //printf("Found speed to add is %d.\n", (rlg->monsters)[num].speed);
       pq_add(&q, &num, turn + 1000/((rlg->monsters)[num].speed));
     }
   }
