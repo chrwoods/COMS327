@@ -19,10 +19,26 @@ int line_of_sight(struct dungeon *rlg, int num){
   uint8_t pc_col = rlg->pc.col;
   uint8_t row = (rlg->monsters)[num].row;
   uint8_t col = (rlg->monsters)[num].col;
-  uint8_t dist = abs(pc_row - row) + abs(pc_col - col);
-  while(dist > 0){
-    //todo
-    break;
+  if(pc_col != col){ //uses Bresenham's line algorithm
+    double derr = ((double)(row - pc_row))/((double)(col - pc_col));
+    if(derr < 0) derr *= -1;
+    double err = 0.0;
+    int y = pc_row;
+    for(int x = pc_col; abs(col - x) > 0; x += ((col - pc_col) > 0) - ((col - pc_col) < 0)){
+      err += derr;
+      if(err < .5 && rlg->map[y][x] != 0) return 0;
+      while(err >= .5){
+	y += ((row - pc_row) > 0) - ((row - pc_row) < 0);
+	err -= 1.0;
+	if(rlg->map[y][x] != 0) return 0;
+      }
+    }
+  } else {
+    int dir = ((row - pc_row) > 0) - ((row - pc_row) < 0);
+    while(pc_row != row){
+      if(rlg->map[pc_row][pc_col] != 0) return 0;
+      pc_row += dir;
+    }
   }
   return 1;
 }
