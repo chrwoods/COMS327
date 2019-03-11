@@ -8,7 +8,7 @@ void generate_room(struct dungeon *rlg, int num);
 
 void generate_corridor(struct dungeon *rlg, int start, int end);
 
-void print_map(struct dungeon *rlg);
+void old_print_map(struct dungeon *rlg);
 
 void generate_map(struct dungeon *rlg, int seed){
   if(seed < 0) srand(time(NULL)); //if given seed is negative, pick random seed
@@ -193,7 +193,7 @@ void generate_corridor(struct dungeon *rlg, int start, int end){
   }
 }
 
-void print_map(struct dungeon *rlg){
+void old_print_map(struct dungeon *rlg){ //deprecated
   //build the 2D character array
   char chargrid[HEIGHT][WIDTH];
   //place rocks and empty spaces
