@@ -3,6 +3,7 @@
 #include "mapsl.h"
 #include "pathing.h"
 #include "danger.h"
+#include "ascii.h"
 
 int main(int argc, char *argv[]){
   struct dungeon *rlg = malloc(sizeof(struct dungeon));
@@ -131,8 +132,8 @@ int main(int argc, char *argv[]){
       pq_add(&q, &num, turn + 1000/((rlg->monsters)[num].speed));
     }
   }
-  if(gamestate == 2) printf("You win!\n");
-  else if(gamestate == 1) printf("You lose.\n");
+  if(gamestate == 2) printf("%s", treasure); //printf("You win!\n");
+  else if(gamestate == 1) printf("%s", tombstone); //printf("You lose.\n");
   //deallocate memory
   empty_map(rlg);
 }
