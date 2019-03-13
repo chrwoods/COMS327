@@ -6,6 +6,7 @@
 #include <time.h>
 #include <endian.h>
 #include <unistd.h>
+#include <curses.h>
 #define WIDTH 80
 #define HEIGHT 21
 #define MIN_ROOMS 6
@@ -52,4 +53,7 @@ struct dungeon {
   struct obj pc;
   int num_monsters;
   struct monster *monsters;
+  char background[HEIGHT][WIDTH];
+  //WINDOW *world;
+  //WINDOW *status;
 };
