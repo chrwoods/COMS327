@@ -75,33 +75,10 @@ int line_of_sight(struct dungeon *rlg, int num){
 void kill_monster(struct dungeon *rlg, int num){
   (rlg->monsters)[num].speed = 0;
 }
-
-void move_pc(struct dungeon *rlg){
-  //meander
-  while(1){
-    int v_dir = (rand() % 3) - 1;
-    int h_dir = (rand() % 3) - 1;
-    if(v_dir == 0 && h_dir == 0) continue;
-    uint8_t row = rlg->pc.row + v_dir;
-    uint8_t col = rlg->pc.col + h_dir;
-    if(rlg->map[row][col] != 0) continue;
-    rlg->pc.row = row;
-    rlg->pc.col = col;
-    //unalive the monsters
-    for(int i = 0; i < rlg->num_monsters; i++){
-      if((rlg->monsters)[i].row == row && (rlg->monsters)[i].col == col){
-	kill_monster(rlg, i); //FATALITY
-	//i--; //technically we can break here, but this checks for monster overlap just in case
-      }
-    }
-    break;
-  }
-  generate_paths(rlg); //generate paths for new PC location
-}
   
 int move_monster(struct dungeon *rlg, int num){
   if(num < 0){//move player
-    move_pc(rlg);
+    //move_pc(rlg);
     return 0;
   }
   //decide where to move
@@ -181,13 +158,15 @@ int move_monster(struct dungeon *rlg, int num){
   //printf("Moving to destination %d, %d.\n", destination / 3, destination % 3);
   //printf("Moving from %d, %d, to %d, %d.\n", row, col, row - 1 + destination / 3, col - 1 + destination % 3);
   //printf("Hardness at destination is %d.\n", rlg->map[row - 1 + destination / 3][col - 1 + destination % 3]);
-  
+
   //move in the given direction
+  mvaddch(row, col, rlg->background[row][col]); //reset where monster was
   if(rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] > 0){
     if(rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] < 85)
       rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] = 0;
     else rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] -= 85;
     generate_paths(rlg); //generate new paths because hardness changed
+    update_background(rlg); //update background because of new possible corridor
   }
   if(rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] == 0){
     (rlg->monsters)[num].row += (destination / 3) - 1;
@@ -197,29 +176,32 @@ int move_monster(struct dungeon *rlg, int num){
     //check combat
     if(row == rlg->pc.row && col == rlg->pc.col) return 1; //the player has been killed
     for(int i = 0; i < rlg->num_monsters; i++){
-      if(num == i) continue;
+      if(num == i) continue; //suicide is not the answer, monsters can only commit homicide
       if((rlg->monsters)[i].row == row && (rlg->monsters)[i].col == col){
 	kill_monster(rlg, i); //FATALITY
 	//i--; //technically we can break here, but this checks for monster overlap just in case
       }
     }
   }
+  char type = (rlg->monsters)[num].type < 10 ? (char)(48 + (rlg->monsters)[num].type) : (char)(87 + (rlg->monsters)[num].type);
+  mvaddch(row, col, type); //add monster at new spot
+  refresh();
   return 0;
 }
 
 void print_monster_list(struct dungeon *rlg){
-  clear();
+  WINDOW *list = newwin(HEIGHT + 3, WIDTH, 0, 0);
   int col = 17;
-  mvprintw(0, col, "                           _                ");
-  mvprintw(1, col, "                          | |               ");
-  mvprintw(2, col, " _ __ ___   ___  _ __  ___| |_ ___ _ __ ___ ");
-  mvprintw(3, col, "| \'_ ` _ \\ / _ \\| \'_ \\/ __| __/ _ \\ \'__/ __|");
-  mvprintw(4, col, "| | | | | | (_) | | | \\__ \\ ||  __/ |  \\__ \\");
-  mvprintw(5, col, "|_| |_| |_|\\___/|_| |_|___/\\__\\___|_|  |___/");
+  mvwprintw(list, 0, col, "                           _                ");
+  mvwprintw(list, 1, col, "                          | |               ");
+  mvwprintw(list, 2, col, " _ __ ___   ___  _ __  ___| |_ ___ _ __ ___ ");
+  mvwprintw(list, 3, col, "| \'_ ` _ \\ / _ \\| \'_ \\/ __| __/ _ \\ \'__/ __|");
+  mvwprintw(list, 4, col, "| | | | | | (_) | | | \\__ \\ ||  __/ |  \\__ \\");
+  mvwprintw(list, 5, col, "|_| |_| |_|\\___/|_| |_|___/\\__\\___|_|  |___/");
   col += 6;
-  mvprintw(7, col, "+------------------------------+");
-  mvprintw(8, col, "|                              |");
-  mvprintw(22, col, "+------------------------------+");
+  mvwprintw(list, 7, col, "+------------------------------+");
+  mvwprintw(list, 8, col, "|                              |");
+  mvwprintw(list, 22, col, "+------------------------------+");
   int key;
   int alive_monsters = 0;
   int monster_array_locs[rlg->num_monsters];
@@ -229,10 +211,11 @@ void print_monster_list(struct dungeon *rlg){
   int page = 0;
   int num_pages = alive_monsters / 6 + (alive_monsters % 6 > 0);
   do{
+    if(page < 0) page = 0;
     for(int i = 0; i < 6; i++){
       if(page * 6 + i >= alive_monsters){
-	mvprintw(9 + i * 2, col, "|                              |");
-	mvprintw(10 + i * 2, col, "|                              |");
+	mvwprintw(list, 9 + i * 2, col, "|                              |");
+	mvwprintw(list, 10 + i * 2, col, "|                              |");
 	continue;
       }
       int num = monster_array_locs[page * 6 + i];
@@ -250,19 +233,20 @@ void print_monster_list(struct dungeon *rlg){
 	horz[0] = 'w';
 	horz[1] = 'e';
       }
-      mvprintw(9 + i * 2, col, "|     %x, %2d %s, %2d %s     |",
+      mvwprintw(list, 9 + i * 2, col, "|     %x, %2d %s, %2d %s     |",
 	       (rlg->monsters)[num].type, v_dist, vert, h_dist, horz);
-      mvprintw(10 + i * 2, col, "|                              |");
+      mvwprintw(list, 10 + i * 2, col, "|                              |");
     }
-    mvprintw(21, col, "|           %4d/%-4d          |", page + 1, num_pages);
-    refresh();
+    if(alive_monsters <= 0) page = -1;
+    mvwprintw(list, 21, col, "|           %4d/%-4d          |", page + 1, num_pages);
+    wrefresh(list);
     key = getch();
     if(key == KEY_DOWN && (page < num_pages - 1)) page++;
     if(key == KEY_UP && (page > 0)) page--;
   }while(key != 27); //27 = escape key (also is alt key, which will also close monster list)
-  clear();
-  print_map(rlg);
-  refresh;
+  wclear(list);
+  delwin(list);
+  refresh();
 }
     
     
