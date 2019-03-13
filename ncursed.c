@@ -5,9 +5,11 @@
 #include "pathing.h"
 #include "danger.h"
 #include "ascii.h"
+#include "hero.h"
 
 int main(int argc, char *argv[]){
   struct dungeon *rlg = malloc(sizeof(struct dungeon));
+  init_map(rlg);
   int seed = -1; //negative seed = random
   int save = 0;
   int load = 0;
@@ -66,6 +68,7 @@ int main(int argc, char *argv[]){
   }
   //print map
   drats();
+  update_background(rlg);
   print_map(rlg);
   //move until the player is dead, probably (or the PC can win)
   int gamestate = 0;
@@ -79,14 +82,21 @@ int main(int argc, char *argv[]){
   }
   while(gamestate == 0){
     int num;
-    int turn;    
+    int turn;
     pq_pop(&q, &num, &turn);
     if(num >= 0){
       if((rlg->monsters)[num].speed == 0) continue; //dead monster, do not add back to queue
     }
-    gamestate = move_monster(rlg, num);
+    if(num < 0){
+      if(pc_turn(rlg) < 0){
+	gamestate = -1; //aborted
+	break;
+      }
+    }
+    else gamestate = move_monster(rlg, num);
     if(gamestate == 1){
       print_map(rlg);
+      usleep(1000000);
       break;
     }
     if(num < 0){
@@ -98,14 +108,14 @@ int main(int argc, char *argv[]){
 	}
       }
       pq_add(&q, &num, turn + 1000/PC_SPEED);
-      print_map(rlg);
-      print_monster_list(rlg);
-      usleep(250000);
+      //print_map(rlg);
+      //print_monster_list(rlg);
+      //usleep(250000);
     } else {
       pq_add(&q, &num, turn + 1000/((rlg->monsters)[num].speed));
     }
   }
-  endwin();
+  stard();
   if(gamestate == 2) printf("%s", treasure); //printf("You win!\n");
   else if(gamestate == 1) printf("%s", tombstone); //printf("You lose.\n");
   //deallocate memory
