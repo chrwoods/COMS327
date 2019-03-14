@@ -92,4 +92,14 @@ void pq_peek(struct pq_queue *q, void *data, int *priority){
   *priority = (q->first)->priority;
 }
 
-//void pq_empty(struct pq_queue *q);
+void pq_empty(struct pq_queue *q){
+  struct pq_node *next = q->first;
+  struct pq_node *cur;
+  while(next != 0) {
+    cur = next;
+    next = next->next;
+    free(cur->data);
+    free(cur);
+  }
+  q->first = 0;
+}
