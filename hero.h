@@ -49,11 +49,20 @@ int pc_turn(struct dungeon *rlg){
     else if(key == '8' || key == 'k') direction = 8;
     else if(key == '9' || key == 'u') direction = 9;
     else if(key == '<' || key == '>') {
-      if(use_staircase(rlg, (char)key) == 0) return 0;
+      if(use_staircase(rlg, (char)key) == 0){ 
+        update_status_text("");
+	return 0;
+      } else {
+        update_status_text("   Staircase not found.");
+	refresh();
+      }
     }
     else if(key == 'q' || key == 'Q') return -1;
     if(direction > 0){
-      if(move_pc(rlg, direction) == 0) return 0;
+      if(move_pc(rlg, direction) == 0){
+	update_status_text("");
+	return 0;
+      } else update_status_text("   You cannot move inside a wall.");
     }
   }
 }
