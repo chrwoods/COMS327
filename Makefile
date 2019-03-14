@@ -1,7 +1,10 @@
+rlg327: rlg327.c
+	gcc rlg327.c -o rlg327 -lm -lncurses
+
+all: rlg327 monstermap mapandpath mapbuild pathfind ncursed
+
 ncursed: ncursed.c
 	gcc ncursed.c -o ncursed -lm -lncurses
-
-all: monstermap mapandpath mapbuild pathfind
 
 monstermap: monstermap.c
 	gcc monstermap.c -o monstermap -lm
