@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
   }
   if(save) save_map(filepath, rlg);
   generate_paths(rlg);
-  rlg->monsters = malloc(rlg->num_monsters * sizeof(struct monster));
+  rlg->monsters = realloc(rlg->monsters, rlg->num_monsters * sizeof(struct monster));
   for(int i = 0; i < rlg->num_monsters; i++){
     generate_monster(rlg, i);
   }
@@ -116,6 +116,8 @@ int main(int argc, char *argv[]){
     }
   }
   stard();
+  pq_empty(&q);
+  clear();
   if(gamestate == 2) printf("%s", treasure); //printf("You win!\n");
   else if(gamestate == 1) printf("%s", tombstone); //printf("You lose.\n");
   //deallocate memory
