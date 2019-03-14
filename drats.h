@@ -64,3 +64,9 @@ void stard(){
   //delwin(rlg->status);
   endwin();
 }
+
+void update_status_text(char* text){
+  for(int i = 0; i < WIDTH; i++) mvaddch(HEIGHT, i, ' '); 
+  mvprintw(HEIGHT, 0, text);
+  refresh();
+}
