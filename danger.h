@@ -246,7 +246,8 @@ void print_monster_list(struct dungeon *rlg){
   }while(key != 27); //27 = escape key (also is alt key, which will also close monster list)
   wclear(list);
   delwin(list);
-  refresh();
+  clear();
+  print_map(rlg);
 }
     
     
