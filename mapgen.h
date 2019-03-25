@@ -237,10 +237,3 @@ void Dungeon::old_print_map(){ //deprecated
     printf("\n");
   }
 }
-
-void Dungeon::empty_map(){
-  free(rooms);
-  free(up);
-  free(down);
-  free(monsters);
-}
