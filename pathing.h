@@ -1,43 +1,33 @@
-void print_hex_map(struct dungeon *rlg){
+void Dungeon::weight_nontunnel(int weight[HEIGHT][WIDTH]){
   for(int i = 0; i < HEIGHT; i++){
     for(int j = 0; j < WIDTH; j++){
-      printf("%02x", (*rlg).map[i][j]);
-    }
-    printf("\n");
-  }
-}
-
-void weight_nontunnel(struct dungeon *rlg, int weight[HEIGHT][WIDTH]){
-  for(int i = 0; i < HEIGHT; i++){
-    for(int j = 0; j < WIDTH; j++){
-      if(rlg->map[i][j] == 0) weight[i][j] = 1;
+      if(map[i][j] == 0) weight[i][j] = 1;
       else weight[i][j] = -1;
     }
   }
 }
 
-void weight_tunnel(struct dungeon *rlg, int weight[HEIGHT][WIDTH]){
+void Dungeon::weight_tunnel(int weight[HEIGHT][WIDTH]){
   for(int i = 0; i < HEIGHT; i++){
     for(int j = 0; j < WIDTH; j++){
-      if(rlg->map[i][j] == 0) weight[i][j] = 1;
-      else if(rlg->map[i][j] == 255) weight[i][j] = -2;
-      else weight[i][j] = 1 + (rlg->map[i][j])/85;
+      if(map[i][j] == 0) weight[i][j] = 1;
+      else if(map[i][j] == 255) weight[i][j] = -2;
+      else weight[i][j] = 1 + map[i][j]/85;
     }
   }
 }
 
-void dijkstra(struct dungeon *rlg, int dist[HEIGHT][WIDTH], int weight[HEIGHT][WIDTH]){
-  struct pq_queue q;
-  pq_init(&q, sizeof(uint16_t));  
-  dist[(*rlg).pc.row][(*rlg).pc.col] = 0;
+void Dungeon::dijkstra(int dist[HEIGHT][WIDTH], int weight[HEIGHT][WIDTH]){
+  PQueue q(sizeof(uint16_t));  
+  dist[pc.row][pc.col] = 0;
   for(int i = 0; i < HEIGHT; i++){
     for(int j = 0; j < WIDTH; j++){
-      if(!((*rlg).pc.row == i && (*rlg).pc.col == j)){
+      if(!(pc.row == i && pc.col == j)){
 	dist[i][j] = 17469 * weight[i][j]; //arbitrary large(ish) number
       }
-      if(weight[i][j] >= 0/* && !((*rlg).pc.row == i && (*rlg).pc.col == j)*/){
+      if(weight[i][j] >= 0){
 	uint16_t coords = i * 256 + j; //store both dimensions in one number
-	pq_add(&q, &coords, dist[i][j]);
+	q.add(&coords, dist[i][j]);
       }
     }
   }
@@ -45,8 +35,8 @@ void dijkstra(struct dungeon *rlg, int dist[HEIGHT][WIDTH], int weight[HEIGHT][W
     uint8_t row;
     uint8_t col;
     uint16_t coords;
-    int priority; //unused
-    pq_pop(&q, &coords, &priority);
+    int priority; //unused currently
+    q.pop(&coords, &priority);
     row = coords / 256;
     col = coords % 256;
     for(int i = -1; i <= 1; i++){
@@ -56,7 +46,7 @@ void dijkstra(struct dungeon *rlg, int dist[HEIGHT][WIDTH], int weight[HEIGHT][W
 	if(alt < dist[row + i][col + j]){
 	  dist[row + i][col + j] = alt;
 	  coords = (row + i) * 256 + col + j;
-	  pq_decrease(&q, &coords, alt);
+	  q.decrease(&coords, alt);
 	}
       }
     }
@@ -70,14 +60,14 @@ void dijkstra(struct dungeon *rlg, int dist[HEIGHT][WIDTH], int weight[HEIGHT][W
   }
 }
 
-void generate_paths(struct dungeon *rlg){
+void Dungeon::generate_paths(){
   int weight[HEIGHT][WIDTH];
   //make nontunneling path
-  weight_nontunnel(rlg, weight);
-  dijkstra(rlg, rlg->nt_path, weight);
+  weight_nontunnel(weight);
+  dijkstra(nt_path, weight);
   //make tunneling path
-  weight_tunnel(rlg, weight);
-  dijkstra(rlg, rlg->t_path, weight);
+  weight_tunnel(weight);
+  dijkstra(t_path, weight);
 }
 
 void print_path(int path[HEIGHT][WIDTH]){
