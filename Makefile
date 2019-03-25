@@ -1,22 +1,31 @@
-rlg327: rlg327.c
-	gcc rlg327.c -o rlg327 -lm -lncurses
+DEPS = classes.h drats.h mapgen.h mapsl.h priorityq.h pathing.h ascii.h danger.h hero.h
 
-all: rlg327 monstermap mapandpath mapbuild pathfind ncursed
+FLAGS = -lm -lncurses #UNUSED
 
-ncursed: ncursed.c
-	gcc ncursed.c -o ncursed -lm -lncurses
+CC = g++
 
-monstermap: monstermap.c
-	gcc monstermap.c -o monstermap -lm
+foggy: foggy.cpp $(DEPS)
+	$(CC) foggy.cpp -o foggy -lm -lncurses
 
-mapandpath: mapandpath.c
-	gcc mapandpath.c -o mapandpath -lm
+rlg327: rlg327.cpp $(DEPS)
+	$(CC) rlg327.cpp -o rlg327 -lm -lncurses
 
-mapbuild: mapbuild.c
-	gcc mapbuild.c -o mapbuild -lm
+all: rlg327 mapbuild pathfind ncursed foggy
 
-pathfind: pathfind.c
-	gcc pathfind.c -o pathfind -lm
+ncursed: ncursed.cpp $(DEPS)
+	$(CC) ncursed.cpp -o ncursed -lm -lncurses
+
+#monstermap: monstermap.c DEPRECATED
+#	gcc monstermap.c -o monstermap -lm
+
+#mapandpath: mapandpath.c DEPRECATED
+#	gcc mapandpath.c -o mapandpath -lm
+
+pathfind: pathfind.cpp $(DEPS)
+	$(CC) pathfind.cpp -o pathfind -lm
+
+mapbuild: mapbuild.cpp $(DEPS)
+	$(CC) mapbuild.cpp -o mapbuild -lm
 
 clean:
-	rm -f ncursed monstermap mapandpath mapbuild pathfind *~
+	rm -f rlg327 foggy ncursed pathfind mapbuild *~
