@@ -145,4 +145,20 @@ class Dungeon {
   void weight_tunnel(int weight[HEIGHT][WIDTH]);
   void dijkstra(int dist[HEIGHT][WIDTH], int weight[HEIGHT][WIDTH]);
   void generate_paths();
+
+  //from danger.h
+  void generate_monster(int num);
+  int line_of_sight(int num);
+  void kill_monster(int num);
+  int move_monster(int num);
+  void print_monster_list();
+
+  //from drats.h
+  void update_background();
+  void print_map();
+
+  //from hero.h
+  int move_pc(int direction);
+  int use_staircase(char stair);
+  int pc_turn();
 };
