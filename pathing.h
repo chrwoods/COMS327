@@ -1,5 +1,3 @@
-#include "priorityq.h"
-
 void print_hex_map(struct dungeon *rlg){
   for(int i = 0; i < HEIGHT; i++){
     for(int j = 0; j < WIDTH; j++){
