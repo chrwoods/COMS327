@@ -119,6 +119,13 @@ class Dungeon {
     pc.row = 0;
   }
 
+  void empty_map(){
+    free(rooms);
+    free(up);
+    free(down);
+    free(monsters);
+  }
+
   //from mapgen.h
   void generate_map_around_pc(int seed);
   void blur_map();
@@ -127,10 +134,15 @@ class Dungeon {
   void generate_corridor(int start, int end);
   void generate_map(int seed);
   void generate_map();
-  void empty_map();
   void old_print_map();
 
   //from mapsl.h
   void save_map(char* filepath);
   int load_map(char* filepath);
+
+  //from pathing.h
+  void weight_nontunnel(int weight[HEIGHT][WIDTH]);
+  void weight_tunnel(int weight[HEIGHT][WIDTH]);
+  void dijkstra(int dist[HEIGHT][WIDTH], int weight[HEIGHT][WIDTH]);
+  void generate_paths();
 };
