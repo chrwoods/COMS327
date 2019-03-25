@@ -1,24 +1,24 @@
-void generate_monster(struct dungeon *rlg, int num){
-  (rlg->monsters)[num].type = rand() % 16;
-  (rlg->monsters)[num].speed = rand() % 16 + 5; //5-20
+void Dungeon::generate_monster(int num){
+  monsters[num].type = rand() % 16;
+  monsters[num].speed = rand() % 16 + 5; //5-20
   while(1){ //place the monster
     uint8_t row = rand() % HEIGHT;
     uint8_t col = rand() % WIDTH;
-    if(rlg->map[row][col] != 0) continue;
-    if(rlg->pc.row == row && rlg->pc.col == col) continue;
-    (rlg->monsters)[num].row = row;
-    (rlg->monsters)[num].col = col;
+    if(map[row][col] != 0) continue;
+    if(pc.row == row && pc.col == col) continue;
+    monsters[num].row = row;
+    monsters[num].col = col;
     break;
   }
-  (rlg->monsters)[num].pc_row = 0;
-  (rlg->monsters)[num].pc_col = 0;
+  monsters[num].pc_row = 0;
+  monsters[num].pc_col = 0;
 }
 
-int line_of_sight(struct dungeon *rlg, int num){
-  uint8_t pc_row = rlg->pc.row;
-  uint8_t pc_col = rlg->pc.col;
-  uint8_t row = (rlg->monsters)[num].row;
-  uint8_t col = (rlg->monsters)[num].col;
+int Dungeon::line_of_sight(int num){
+  uint8_t pc_row = pc.row;
+  uint8_t pc_col = pc.col;
+  uint8_t row = monsters[num].row;
+  uint8_t col = monsters[num].col;
   if(pc_col != col){ //uses Bresenham's line algorithm
     double derr = ((double)(row - pc_row))/((double)(col - pc_col));
     if(derr < 0) derr *= -1;
@@ -26,100 +26,94 @@ int line_of_sight(struct dungeon *rlg, int num){
     int y = pc_row;
     for(int x = pc_col; abs(col - x) > 0; x += ((col - pc_col) > 0) - ((col - pc_col) < 0)){
       err += derr;
-      if(err < .5 && rlg->map[y][x] != 0) return 0;
+      if(err < .5 && map[y][x] != 0) return 0;
       while(err >= .5){
 	y += ((row - pc_row) > 0) - ((row - pc_row) < 0);
 	err -= 1.0;
-	if(rlg->map[y][x] != 0) return 0;
+	if(map[y][x] != 0) return 0;
       }
     }
   } else {
     int dir = ((row - pc_row) > 0) - ((row - pc_row) < 0);
     while(pc_row != row){
-      if(rlg->map[pc_row][pc_col] != 0) return 0;
+      if(map[pc_row][pc_col] != 0) return 0;
       pc_row += dir;
     }
   }
   return 1;
 }
 
-/*void kill_monster(struct dungeon *rlg, int num){
-  if(rlg->num_monsters == 0){
+/* This version of kill_monster removes it and reallocs from the monster pointer array, however this breaks turn ordering so it's deprecated (for now)
+void kill_monster(struct dungeon *rlg, int num){
+  if(num_monsters == 0){
     printf("No monsters left.\n"); 
     return;
   }
-  if(num >= rlg->num_monsters){
+  if(num >= num_monsters){
     printf("Trying to kill a nonexistent monster.\n");
     return;
   }
-  if(rlg->num_monsters == 1){
-    rlg->num_monsters = 0;
-    free(rlg->monsters);
+  if(num_monsters == 1){
+    num_monsters = 0;
+    freemonsters;
     return;
   }
-  if(rlg->num_monsters - 1 == num){
-    rlg->num_monsters--;
-    rlg->monsters = realloc(rlg->monsters, rlg->num_monsters * sizeof(struct monster));
+  if(num_monsters - 1 == num){
+    num_monsters--;
+    monsters = realloc(monsters, num_monsters * sizeof(struct monster));
     return;
   }
-  rlg->num_monsters--;
-  (rlg->monsters)[num].row = (rlg->monsters)[rlg->num_monsters].row;
-  (rlg->monsters)[num].col = (rlg->monsters)[rlg->num_monsters].col;
-  (rlg->monsters)[num].type = (rlg->monsters)[rlg->num_monsters].type;
-  (rlg->monsters)[num].speed = (rlg->monsters)[rlg->num_monsters].speed;
-  (rlg->monsters)[num].pc_row = (rlg->monsters)[rlg->num_monsters].pc_row;
-  (rlg->monsters)[num].pc_col = (rlg->monsters)[rlg->num_monsters].pc_col;
-  rlg->monsters = realloc(rlg->monsters, rlg->num_monsters * sizeof(struct monster));
+  num_monsters--;
+  monsters[num].row = monsters[num_monsters].row;
+  monsters[num].col = monsters[num_monsters].col;
+  monsters[num].type = monsters[num_monsters].type;
+  monsters[num].speed = monsters[num_monsters].speed;
+  monsters[num].pc_row = monsters[num_monsters].pc_row;
+  monsters[num].pc_col = monsters[num_monsters].pc_col;
+  monsters = realloc(monsters, num_monsters * sizeof(struct monster));
 }*/
 
-void kill_monster(struct dungeon *rlg, int num){
-  (rlg->monsters)[num].speed = 0;
+void Dungeon::kill_monster(int num){
+  monsters[num].speed = 0; //(dead monsters can't move)
 }
   
-int move_monster(struct dungeon *rlg, int num){
+int Dungeon::move_monster(int num){
   if(num < 0){//move player
     //move_pc(rlg);
     return 0;
   }
   //decide where to move
-  if(((rlg->monsters)[num].type & MON_TELEPATHIC) == MON_TELEPATHIC){
-    (rlg->monsters)[num].pc_row = rlg->pc.row;
-    (rlg->monsters)[num].pc_col = rlg->pc.col;
+  if((monsters[num].type & MON_TELEPATHIC) == MON_TELEPATHIC){
+    monsters[num].pc_row = pc.row;
+    monsters[num].pc_col = pc.col;
   } else {
-    if(line_of_sight(rlg, num)){
-      (rlg->monsters)[num].pc_row = rlg->pc.row;
-      (rlg->monsters)[num].pc_col = rlg->pc.col;
-    } else if(((rlg->monsters)[num].type & MON_SMART) != MON_SMART){
-      (rlg->monsters)[num].pc_row = 0;
-      (rlg->monsters)[num].pc_col = 0;
+    if(line_of_sight(num)){
+      monsters[num].pc_row = pc.row;
+      monsters[num].pc_col = pc.col;
+    } else if((monsters[num].type & MON_SMART) != MON_SMART){
+      monsters[num].pc_row = 0;
+      monsters[num].pc_col = 0;
     }
   }
-  //printf("Monster number %d has stored pc values of %d, %d.\nActual values are %d, %d.\n", num, (rlg->monsters)[num].pc_row, (rlg->monsters)[num].pc_col, rlg->pc.row, rlg->pc.col);
+  //printf("Monster number %d has stored pc values of %d, %d.\nActual values are %d, %d.\n", num, monsters[num].pc_row, monsters[num].pc_col, pc.row, pc.col);
   
   //find the neighbors
   int neighbors[3][3];
-  uint8_t row = (rlg->monsters)[num].row;
-  uint8_t col = (rlg->monsters)[num].col;
+  uint8_t row = monsters[num].row;
+  uint8_t col = monsters[num].col;
   for(int i = -1; i <= 1; i++){
     for(int j = -1; j <= 1; j++){
-      if(((rlg->monsters)[num].type & MON_TUNNEL) == MON_TUNNEL){
-	neighbors[i + 1][j + 1] = rlg->t_path[row + i][col + j];
+      if((monsters[num].type & MON_TUNNEL) == MON_TUNNEL){
+	neighbors[i + 1][j + 1] = t_path[row + i][col + j];
       } else {	
-	neighbors[i + 1][j + 1] = rlg->nt_path[row + i][col + j];
+	neighbors[i + 1][j + 1] = nt_path[row + i][col + j];
       }
     }
   }
-  /*printf("Neighbors array of monster number %d is:\n", num);
-  for(int i = 0; i < 3; i++){
-    for(int j = 0; j < 3; j++){
-      printf("%d ", neighbors[i][j]);
-    }
-    printf("\n");
-  }*/
   
   //decide where to move
   int destination = 4; //center
-  if((rlg->monsters)[num].pc_row == rlg->pc.row && (rlg->monsters)[num].pc_col == rlg->pc.col && (((rlg->monsters)[num].type & MON_SMART) == MON_SMART)){
+  if(monsters[num].pc_row == pc.row && monsters[num].pc_col == pc.col && ((monsters[num].type & MON_SMART) == MON_SMART)){
     int shortest_dist = 17469; //arbitrarily large(ish)
     for(int i = 0; i < 9; i++){	
       if(neighbors[i / 3][i % 3] < shortest_dist && neighbors[i / 3][i % 3] >= 0){
@@ -129,9 +123,9 @@ int move_monster(struct dungeon *rlg, int num){
 	destination = i;
       }
     }
-  } else if((rlg->monsters)[num].pc_row + (rlg->monsters)[num].pc_col > 0){ //if there is a stored PC location
-    int v_dist = (rlg->monsters)[num].pc_row - row;
-    int h_dist = (rlg->monsters)[num].pc_col - col;
+  } else if(monsters[num].pc_row + monsters[num].pc_col > 0){ //if there is a stored PC location
+    int v_dist = monsters[num].pc_row - row;
+    int h_dist = monsters[num].pc_col - col;
     int v_dir = 0;
     int h_dir = 0;
     if(v_dist != 0) v_dir = abs(v_dist)/v_dist; //gets sign
@@ -145,11 +139,9 @@ int move_monster(struct dungeon *rlg, int num){
     } //otherwise it will not move
     destination = v_dir * 3 + h_dir + 4;
   }
-  //printf("Calculated destination %d, %d.\n", destination / 3, destination % 3);
-  //printf("Note: monster type is %d, and it's erratic value is %d.\n", (rlg->monsters)[num].type, ((rlg->monsters)[num].type & MON_ERRATIC) == MON_ERRATIC);
   
   //erratic behavior
-  if(((rlg->monsters)[num].type & MON_ERRATIC) == MON_ERRATIC && rand() % 2 == 1){
+  if((monsters[num].type & MON_ERRATIC) == MON_ERRATIC && rand() % 2 == 1){
     while(1){
       destination = rand() % 9;
       if(neighbors[destination / 3][destination % 3] >= 0) break; //check if moving here is possible
@@ -157,39 +149,39 @@ int move_monster(struct dungeon *rlg, int num){
   }
   //printf("Moving to destination %d, %d.\n", destination / 3, destination % 3);
   //printf("Moving from %d, %d, to %d, %d.\n", row, col, row - 1 + destination / 3, col - 1 + destination % 3);
-  //printf("Hardness at destination is %d.\n", rlg->map[row - 1 + destination / 3][col - 1 + destination % 3]);
+  //printf("Hardness at destination is %d.\n", map[row - 1 + destination / 3][col - 1 + destination % 3]);
 
   //move in the given direction
-  mvaddch(row, col, rlg->background[row][col]); //reset where monster was
-  if(rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] > 0){
-    if(rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] < 85)
-      rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] = 0;
-    else rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] -= 85;
-    generate_paths(rlg); //generate new paths because hardness changed
-    update_background(rlg); //update background because of new possible corridor
+  mvaddch(row, col, background[row][col]); //reset where monster was
+  if(map[row - 1 + destination / 3][col - 1 + destination % 3] > 0){
+    if(map[row - 1 + destination / 3][col - 1 + destination % 3] < 85)
+      map[row - 1 + destination / 3][col - 1 + destination % 3] = 0;
+    else map[row - 1 + destination / 3][col - 1 + destination % 3] -= 85;
+    generate_paths(); //generate new paths because hardness changed
+    update_background(); //update background because of new possible corridor
   }
-  if(rlg->map[row - 1 + destination / 3][col - 1 + destination % 3] == 0){
-    (rlg->monsters)[num].row += (destination / 3) - 1;
-    (rlg->monsters)[num].col += (destination % 3) - 1;
-    row = (rlg->monsters)[num].row;
-    col = (rlg->monsters)[num].col;
+  if(map[row - 1 + destination / 3][col - 1 + destination % 3] == 0){
+    monsters[num].row += (destination / 3) - 1;
+    monsters[num].col += (destination % 3) - 1;
+    row = monsters[num].row;
+    col = monsters[num].col;
     //check combat
-    if(row == rlg->pc.row && col == rlg->pc.col) return 1; //the player has been killed
-    for(int i = 0; i < rlg->num_monsters; i++){
+    if(row == pc.row && col == pc.col) return 1; //the player has been killed
+    for(int i = 0; i < num_monsters; i++){
       if(num == i) continue; //suicide is not the answer, monsters can only commit homicide
-      if((rlg->monsters)[i].row == row && (rlg->monsters)[i].col == col){
-	kill_monster(rlg, i); //FATALITY
+      if(monsters[i].row == row && monsters[i].col == col){
+	kill_monster(i); //FATALITY
 	//i--; //technically we can break here, but this checks for monster overlap just in case
       }
     }
   }
-  char type = (rlg->monsters)[num].type < 10 ? (char)(48 + (rlg->monsters)[num].type) : (char)(87 + (rlg->monsters)[num].type);
+  char type = monsters[num].type < 10 ? (char)(48 + monsters[num].type) : (char)(87 + monsters[num].type);
   mvaddch(row, col, type); //add monster at new spot
   refresh();
   return 0;
 }
 
-void print_monster_list(struct dungeon *rlg){
+void Dungeon::print_monster_list(){
   WINDOW *list = newwin(HEIGHT + 3, WIDTH, 0, 0);
   int col = 17;
   mvwprintw(list, 0, col, "                           _                ");
@@ -204,9 +196,9 @@ void print_monster_list(struct dungeon *rlg){
   mvwprintw(list, 22, col, "+------------------------------+");
   int key;
   int alive_monsters = 0;
-  int monster_array_locs[rlg->num_monsters];
-  for(int i = 0; i < rlg->num_monsters; i++){
-    if((rlg->monsters)[i].speed != 0) monster_array_locs[alive_monsters++] = i;
+  int monster_array_locs[num_monsters];
+  for(int i = 0; i < num_monsters; i++){
+    if(monsters[i].speed != 0) monster_array_locs[alive_monsters++] = i;
   }
   int page = 0;
   int num_pages = alive_monsters / 6 + (alive_monsters % 6 > 0);
@@ -221,8 +213,8 @@ void print_monster_list(struct dungeon *rlg){
       int num = monster_array_locs[page * 6 + i];
       char vert[6] = "north";
       char horz[5] = "east";
-      int v_dist = rlg->pc.row - (rlg->monsters)[num].row;
-      int h_dist = (rlg->monsters)[num].col - rlg->pc.col;
+      int v_dist = pc.row - monsters[num].row;
+      int h_dist = monsters[num].col - pc.col;
       if(v_dist < 0) {
 	v_dist *= -1;
 	vert[0] = 's';
@@ -234,7 +226,7 @@ void print_monster_list(struct dungeon *rlg){
 	horz[1] = 'e';
       }
       mvwprintw(list, 9 + i * 2, col, "|     %x, %2d %s, %2d %s     |",
-	       (rlg->monsters)[num].type, v_dist, vert, h_dist, horz);
+		monsters[num].type, v_dist, vert, h_dist, horz);
       mvwprintw(list, 10 + i * 2, col, "|                              |");
     }
     if(alive_monsters <= 0) page = -1;
@@ -247,7 +239,7 @@ void print_monster_list(struct dungeon *rlg){
   wclear(list);
   delwin(list);
   clear();
-  print_map(rlg);
+  print_map();
 }
     
     
