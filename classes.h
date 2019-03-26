@@ -109,7 +109,10 @@ class Dungeon {
   int num_monsters;
   Monster *monsters;
   char background[HEIGHT][WIDTH];
-
+  bool fog;
+  char memory[HEIGHT][WIDTH];
+  bool visible[HEIGHT][WIDTH];
+  
   Dungeon(){
     rooms = (Room*)malloc(1);
     up = (Obj*)malloc(1);
@@ -117,6 +120,7 @@ class Dungeon {
     num_monsters = 0;
     monsters = (Monster*)malloc(1);
     pc.row = 0;
+    fog = true;
   }
 
   void empty_map(){
@@ -155,6 +159,8 @@ class Dungeon {
 
   //from drats.h
   void update_background();
+  void update_fog();
+  void print_fog();
   void print_map();
 
   //from hero.h
