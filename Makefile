@@ -4,13 +4,13 @@ FLAGS = -lm -lncurses #UNUSED
 
 CC = g++
 
-foggy: foggy.cpp $(DEPS)
-	$(CC) foggy.cpp -o foggy -lm -lncurses
+#foggy: foggy.cpp $(DEPS)
+#	$(CC) foggy.cpp -o foggy -lm -lncurses
 
 rlg327: rlg327.cpp $(DEPS)
 	$(CC) rlg327.cpp -o rlg327 -lm -lncurses
 
-all: rlg327 mapbuild pathfind ncursed foggy
+all: rlg327 mapbuild pathfind ncursed #foggy
 
 ncursed: ncursed.cpp $(DEPS)
 	$(CC) ncursed.cpp -o ncursed -lm -lncurses
@@ -28,4 +28,4 @@ mapbuild: mapbuild.cpp $(DEPS)
 	$(CC) mapbuild.cpp -o mapbuild -lm
 
 clean:
-	rm -f rlg327 foggy ncursed pathfind mapbuild *~
+	rm -f rlg327 ncursed pathfind mapbuild *~
