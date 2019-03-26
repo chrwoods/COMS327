@@ -152,7 +152,8 @@ int Dungeon::move_monster(int num){
   //printf("Hardness at destination is %d.\n", map[row - 1 + destination / 3][col - 1 + destination % 3]);
 
   //move in the given direction
-  mvaddch(row, col, background[row][col]); //reset where monster was
+  if(!fog) mvaddch(row, col, background[row][col]); //reset where monster was
+  else mvaddch(row, col, memory[row][col]);
   if(map[row - 1 + destination / 3][col - 1 + destination % 3] > 0){
     if(map[row - 1 + destination / 3][col - 1 + destination % 3] < 85)
       map[row - 1 + destination / 3][col - 1 + destination % 3] = 0;
@@ -176,7 +177,7 @@ int Dungeon::move_monster(int num){
     }
   }
   char type = monsters[num].type < 10 ? (char)(48 + monsters[num].type) : (char)(87 + monsters[num].type);
-  mvaddch(row, col, type); //add monster at new spot
+  if(!fog || visible[row][col]) mvaddch(row, col, type); //add monster at new spot
   refresh();
   return 0;
 }
