@@ -93,6 +93,13 @@ void Dungeon::generate_map_around_pc(int seed){
   }  
   //for(int i = 0; i < num_rooms - 1; i++) generate_corridor(map, rooms, i, i+1); old way to generate maps
   //return num_rooms;
+  //set the memory and visibility for fog  
+  for(int i = 0; i < HEIGHT; i++){ 
+    for(int j = 0; j < WIDTH; j++){
+      memory[i][j] = ' ';
+      visible[i][j] = false;
+    }
+  }
 }
 
 void Dungeon::blur_map(){
