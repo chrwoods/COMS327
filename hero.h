@@ -19,6 +19,7 @@ int Dungeon::move_pc(int direction){
   }
   generate_paths(); //generate paths for new PC location
   mvaddch(row, col, '@'); //add pc on map again
+  update_fog(); //update fog around player
   refresh();
   return 0;
 }
@@ -55,6 +56,15 @@ int Dungeon::pc_turn(){
       } else {
         update_status_text("   Staircase not found.");
 	refresh();
+      }
+    }
+    else if(key == 'f') {
+      if(fog){
+	fog = false;
+	print_map();
+      } else {
+	fog = true;
+	print_fog();
       }
     }
     else if(key == 'q' || key == 'Q') return -1;
