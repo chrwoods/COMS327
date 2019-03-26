@@ -116,5 +116,12 @@ int Dungeon::load_map(char* filepath){
   //check if filesize is correct and close file
   if(num32 != 1708) printf("Warning: given filesize does not match actual filesize.\n");
   fclose(fp);
+  //set the memory and visibility for fog  
+  for(int i = 0; i < HEIGHT; i++){ 
+    for(int j = 0; j < WIDTH; j++){
+      memory[i][j] = ' ';
+      visible[i][j] = false;
+    }
+  }
   return 0;
 }
