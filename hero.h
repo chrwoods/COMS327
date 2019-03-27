@@ -35,6 +35,65 @@ int Dungeon::use_staircase(char stair){
   return 0;
 }
 
+void Dungeon::teleport(){
+  bool stored_fog = fog;
+  fog = false;
+  print_map();
+  char screen[HEIGHT][WIDTH];
+  for(int i = 0; i < HEIGHT; i++){
+    for(int j = 0; j < WIDTH; j++){
+      screen[i][j] = mvinch(i, j);
+    }
+  }
+  Obj dest(pc.row, pc.col);
+  mvaddch(dest.row, dest.col, '*');
+  refresh();
+  while(1){
+    int key = getch();
+    int direction = 0;
+    if(key == '1' || key == 'b') direction = 1;
+    else if(key == '2' || key == 'j') direction = 2;
+    else if(key == '3' || key == 'n') direction = 3;
+    else if(key == '4' || key == 'h') direction = 4;
+    else if(key == '6' || key == 'l') direction = 6;
+    else if(key == '7' || key == 'y') direction = 7;
+    else if(key == '8' || key == 'k') direction = 8;
+    else if(key == '9' || key == 'u') direction = 9;
+    else if(key == 'r'){
+      dest.row = 1 + rand() % (HEIGHT - 1);
+      dest.col = 1 + rand() % (WIDTH - 1);
+      key = 't';
+    }
+    if(key == 't'){
+      //teleport
+      pc.row = dest.row;
+      pc.col = dest.col;
+      break;
+    } else if(direction != 0){
+      int v_dir = 1 - ((direction - 1) / 3);
+      int h_dir = ((direction - 1) % 3) - 1;
+      if(dest.row + v_dir <= 0 || dest.row + v_dir >= HEIGHT - 1 || dest.col + h_dir <= 0 || dest.col + h_dir >= WIDTH - 1){
+	update_status_text("   You cannot teleport out of the map!");
+	continue;
+      }
+      update_status_text("");
+      mvaddch(dest.row, dest.col, screen[dest.row][dest.col]);
+      dest.row += v_dir;
+      dest.col += h_dir;
+      mvaddch(dest.row, dest.col, '*');
+    }
+  }
+  //reset visibility
+  for(int i = 0; i < HEIGHT; i++){
+    for(int j = 0; j < WIDTH; j++){
+      visible[i][j] = false;
+    }
+  }
+  fog = stored_fog;
+  if(!fog) update_fog();
+  print_map();
+}
+
 int Dungeon::pc_turn(){
   while(1){
     int key = getch();
@@ -66,6 +125,10 @@ int Dungeon::pc_turn(){
 	fog = true;
 	print_fog();
       }
+    }
+    else if(key == 't'){
+      teleport();
+      return 0;
     }
     else if(key == 'q' || key == 'Q') return -1;
     if(direction > 0){
