@@ -136,13 +136,21 @@ int Dungeon::move_monster(int num){
       v_dir = 0; //if can go horizontal, continue
     } else if(neighbors[v_dir + 1][1] >= 0){
       h_dir = 0; //if can go vertical, continue
-    } //otherwise it will not move
+    } else {
+      v_dir = 0;
+      h_dir = 0;//otherwise it will not move
+    }
     destination = v_dir * 3 + h_dir + 4;
   }
   
   //erratic behavior
   if((monsters[num].type & MON_ERRATIC) == MON_ERRATIC && rand() % 2 == 1){
+    int counter = 0;
     while(1){
+      if(counter++ > 50) { //checks for infinite loop from PC teleporting into rock
+	destination = 5;
+	break;
+      }
       destination = rand() % 9;
       if(neighbors[destination / 3][destination % 3] >= 0) break; //check if moving here is possible
     }
