@@ -167,4 +167,5 @@ class Dungeon {
   int move_pc(int direction);
   int use_staircase(char stair);
   int pc_turn();
+  void teleport();
 };
