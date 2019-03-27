@@ -1,4 +1,4 @@
-Changelog for assignment 1.01:
+Changelog:
 
 01/30/2019 - began map generator, completed function allowing for seeding and room generation
 
@@ -31,3 +31,9 @@ Changelog for assignment 1.01:
 03/12/2019 - troubleshooted WINDOW object problems where it wouldn't render on initialization.
 
 03/13/2019 - threw WINDOW object usage directly into the garbage can and switched to using standard screen (stdscr), which fixed all bugs instantly. Finished hero.h to handle player movement, and added error output. Changed mapgen.h to be able to generate a map around the player character for staircase functionality. Currently is not persistent, this will be changed later. Added page counting for the monster list. Updated README and Makefile.
+
+03/25/2019 - changed every single file to C++, changing all structs to classes and (almost) all functions to class functions. This resulted in the deletetion of mapandpath.c and monstermap.c, since they didn't use ncurses but the monster methods do, which was too tedious to fix, especially since it was just the maintenance of old programs, so they were removed. Also made the Makefile much fancier to include constants, including a fancy string that makes every make rule include all of the header files automatically.
+
+03/26/2019 - added fog of war, including new print functions in drats.h and new variables into the Dungeon class, remembered terrain, a boolean for whether fog is on or off, and currently visible spots on the map. Added teleport function to hero.h, plus functionality for the 't' and 'f' keys into pc_turn.
+
+03/27/2019 - fixed a bug that froze the game when an erratic monster tried to move while the player was in a wall. Updated README.
