@@ -95,7 +95,6 @@ int Dungeon::move_monster(int num){
       monsters[num].pc_col = 0;
     }
   }
-  //printf("Monster number %d has stored pc values of %d, %d.\nActual values are %d, %d.\n", num, monsters[num].pc_row, monsters[num].pc_col, pc.row, pc.col);
   
   //find the neighbors
   int neighbors[3][3];
@@ -155,13 +154,17 @@ int Dungeon::move_monster(int num){
       if(neighbors[destination / 3][destination % 3] >= 0) break; //check if moving here is possible
     }
   }
-  //printf("Moving to destination %d, %d.\n", destination / 3, destination % 3);
-  //printf("Moving from %d, %d, to %d, %d.\n", row, col, row - 1 + destination / 3, col - 1 + destination % 3);
-  //printf("Hardness at destination is %d.\n", map[row - 1 + destination / 3][col - 1 + destination % 3]);
-
+  
   //move in the given direction
-  if(!fog) mvaddch(row, col, background[row][col]); //reset where monster was
-  else mvaddch(row, col, memory[row][col]);
+  if(!fog || visible[row][col]){
+    attron(COLOR_PAIR(WHITE_PAIR));
+    mvaddch(row, col, background[row][col]); //reset where monster was
+    attroff(COLOR_PAIR(WHITE_PAIR));
+  }else{
+    attron(COLOR_PAIR(GRAY_PAIR));
+    mvaddch(row, col, memory[row][col]);
+    attroff(COLOR_PAIR(GRAY_PAIR));
+  }
   if(map[row - 1 + destination / 3][col - 1 + destination % 3] > 0){
     if(map[row - 1 + destination / 3][col - 1 + destination % 3] < 85)
       map[row - 1 + destination / 3][col - 1 + destination % 3] = 0;
@@ -180,17 +183,21 @@ int Dungeon::move_monster(int num){
       if(num == i) continue; //suicide is not the answer, monsters can only commit homicide
       if(monsters[i].row == row && monsters[i].col == col){
 	kill_monster(i); //FATALITY
-	//i--; //technically we can break here, but this checks for monster overlap just in case
       }
     }
   }
   char type = monsters[num].type < 10 ? (char)(48 + monsters[num].type) : (char)(87 + monsters[num].type);
-  if(!fog || visible[row][col]) mvaddch(row, col, type); //add monster at new spot
+  if(!fog || visible[row][col]) {
+    attron(COLOR_PAIR(WHITE_PAIR));
+    mvaddch(row, col, type); //add monster at new spot
+    attroff(COLOR_PAIR(GRAY_PAIR));
+  }
   refresh();
   return 0;
 }
 
 void Dungeon::print_monster_list(){
+  attron(COLOR_PAIR(WHITE_PAIR));
   WINDOW *list = newwin(HEIGHT + 3, WIDTH, 0, 0);
   int col = 17;
   mvwprintw(list, 0, col, "                           _                ");
@@ -248,6 +255,7 @@ void Dungeon::print_monster_list(){
   wclear(list);
   delwin(list);
   clear();
+  attroff(COLOR_PAIR(WHITE_PAIR));
   print_map();
 }
     
