@@ -7,6 +7,7 @@ int Dungeon::move_pc(int direction){
   row += v_dir;
   col += h_dir;
   if(map[row][col] != 0) return -1;
+  attron(COLOR_PAIR(WHITE_PAIR));
   mvaddch(pc.row, pc.col, background[pc.row][pc.col]); //remove player from the map
   pc.row = row;
   pc.col = col;
@@ -19,6 +20,7 @@ int Dungeon::move_pc(int direction){
   }
   generate_paths(); //generate paths for new PC location
   mvaddch(row, col, '@'); //add pc on map again
+  attroff(COLOR_PAIR(WHITE_PAIR));
   update_fog(); //update fog around player
   refresh();
   return 0;
