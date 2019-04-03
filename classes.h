@@ -1,12 +1,11 @@
-//#include <stdio.h>
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 #include <stdlib.h>
-//#include <string.h>
 #include <stdint.h>
 #include <math.h>
 #include <time.h>
@@ -24,6 +23,11 @@ using namespace std;
 #define MON_TELEPATHIC 2
 #define MON_TUNNEL 4
 #define MON_ERRATIC 8
+#define MON_PASS 16
+#define MON_PICKUP 32
+#define MON_DESTROY 64
+#define MON_UNIQ 128
+#define MON_BOSS 256
 
 class Room {
  public:
@@ -113,11 +117,11 @@ class Dice {
 
   string toString(){
     string str = "";
-    str += base;
+    str += std::to_string(base);
     str += "+";
-    str += dice;
+    str += std::to_string(dice);
     str += "d";
-    str += sides;
+    str += std::to_string(sides);
     return str;
   }
 };
@@ -159,6 +163,16 @@ class Monster {
   bool dead(){
     return false; //todo
   }
+
+  bool smart(){ return (abilities & MON_SMART) == MON_SMART;}
+  bool telepathic(){ return (abilities & MON_TELEPATHIC) == MON_TELEPATHIC;}
+  bool tunnel(){ return (abilities & MON_TUNNEL) == MON_TUNNEL;}
+  bool erratic(){ return (abilities & MON_ERRATIC) == MON_ERRATIC;}
+  bool pass(){ return (abilities & MON_PASS) == MON_PASS;}
+  bool pickup(){ return (abilities & MON_PICKUP) == MON_PICKUP;}
+  bool destroy(){ return (abilities & MON_DESTROY) == MON_DESTROY;}
+  bool unique(){ return (abilities & MON_UNIQ) == MON_UNIQ;}
+  bool boss(){ return (abilities & MON_BOSS) == MON_BOSS;}
 };
 
 class Dungeon {
@@ -174,7 +188,7 @@ class Dungeon {
   Obj *down;
   Obj pc;
   int num_monsters;
-  Monster *monsters;
+  vector<Monster> monsters;
   char background[HEIGHT][WIDTH];
   bool fog;
   char memory[HEIGHT][WIDTH];
@@ -185,7 +199,7 @@ class Dungeon {
     up = (Obj*)malloc(1);
     down = (Obj*)malloc(1);
     num_monsters = 0;
-    monsters = (Monster*)malloc(1);
+    //monsters = (Monster*)malloc(1);
     pc.row = 0;
     fog = true;
   }
@@ -194,7 +208,7 @@ class Dungeon {
     free(rooms);
     free(up);
     free(down);
-    free(monsters);
+    //free(monsters);
   }
 
   //from mapgen.h
@@ -239,4 +253,6 @@ class Dungeon {
   //from loader.h
   int load_monsters(string filepath);
   int load_monster(ifstream *fp);
+  void print_monsters();
+  void print_monster(int num);
 };
