@@ -37,3 +37,9 @@ Changelog:
 03/26/2019 - added fog of war, including new print functions in drats.h and new variables into the Dungeon class, remembered terrain, a boolean for whether fog is on or off, and currently visible spots on the map. Added teleport function to hero.h, plus functionality for the 't' and 'f' keys into pc_turn.
 
 03/27/2019 - fixed a bug that froze the game when an erratic monster tried to move while the player was in a wall. Updated README.
+
+04/01/2019 - finished entire game. Haha, april fools... gotcha. Anyways, added color to the dungeon, so that remembered terrain would render as gray instead of white, so only currently visible terrain is white. This isn't part of any current assignment, but I saw it in one of Sheaffer's demos and it looked cool, so I implemented it.
+
+04/02/2019 - began writing the loading of monsters into a header called loader.h. This also resulted in the creation of testload.cpp in order to test the loading of the monsters. Loading was mostly completed, save for printing the output for the gracious TAs, and reading in abilities.
+
+04/03/2019 - finished writing the loading of monsters and wrote functions to print the stored data. I was running into segfaults, but according to literally everyone on stackexchange I was being stupid for using a pointer array of classes, so I switched to a vector to hold the monsters and hooray, no more sefaults. I had extra time, so I wrote the item loading and printing as well. I copied testload.cpp to rlg327.cpp for the ease of grading, and updated the Makefile and README accordingly.
