@@ -11,4 +11,5 @@ int main(int argc, char* argv[]){
     printf("Problem encountered with loading monsters, exiting.\n");
     return loaded;
   }
+  rlg.print_monsters();
 }
