@@ -78,6 +78,7 @@ int Dungeon::load_monster(ifstream *fp){
       complete = complete | 0x8;
     } else if(header.compare("ABIL") == 0){
       if((complete & 0x10) == 0x10) return -1; //field already filled
+      monster.abilities = 0;
       while(line.find_first_of(" ") != std::string::npos){
 	line = line.substr(line.find_first_of(" ") + 1);
 	//add ability
@@ -138,6 +139,9 @@ void Dungeon::print_monster(int num){
       break;
     case GREEN_PAIR:
       cout << "Green";
+      break;
+    case CYAN_PAIR:
+      cout << "Cyan";
       break;
     case RED_PAIR:
       cout << "Red";
@@ -359,7 +363,7 @@ void Dungeon::print_item(int num){
   cout << "Description: " << endl;
   cout << items[num].desc;
   //print type
-  cout << items[num].type << endl;
+  cout << "Type: " << items[num].type << endl;
   //print colors
   cout << "Color: ";
   switch(items[num].color){
@@ -368,6 +372,9 @@ void Dungeon::print_item(int num){
     break;
   case GREEN_PAIR:
     cout << "Green";
+    break;
+  case CYAN_PAIR:
+    cout << "Cyan";
     break;
   case RED_PAIR:
     cout << "Red";
