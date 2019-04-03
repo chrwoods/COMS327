@@ -1,6 +1,12 @@
-#include <stdio.h>
+//#include <stdio.h>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+using namespace std;
+
 #include <stdlib.h>
-#include <string.h>
+//#include <string.h>
 #include <stdint.h>
 #include <math.h>
 #include <time.h>
@@ -71,26 +77,87 @@ class Obj {
   }
 };
 
+class Dice {
+ public:
+  int base;
+  int dice;
+  int sides;
+
+  Dice(){
+    //do nothing
+  }
+  
+  Dice(int b, int d, int s){
+    base = b;
+    dice = d;
+    sides = s;
+  }
+
+  Dice(string str){
+    parse(str);
+  }
+
+  void parse(string str){
+    base = stoi(str.substr(0, str.find_first_of('+')));
+    dice = stoi(str.substr(str.find_first_of('+') + 1, str.find_first_of('d') - str.find_first_of('+')));
+    sides = stoi(str.substr(str.find_first_of('d') + 1));
+  }
+
+  int roll(){
+    int val = base;
+    for(int i = 0; i < dice; i++){
+      base += 1 + rand() % sides;
+    }
+    return val;
+  }
+
+  string toString(){
+    string str = "";
+    str += base;
+    str += "+";
+    str += dice;
+    str += "d";
+    str += sides;
+    return str;
+  }
+};
+
 class Monster {
  public:
   uint8_t row;
   uint8_t col;
-  uint8_t type;
-  uint8_t speed;
   uint8_t pc_row;
   uint8_t pc_col;
+
+  uint8_t type;
+  //uint8_t speed;
+
+  string name;
+  string desc;
+  short int colors[8]; //max of 8 colors (technically 7, since black can't be placed
+  short int num_colors;
+  Dice speed;
+  uint16_t abilities;
+  Dice hp;
+  Dice damage;
+  char symbol;
+  uint8_t rarity;
   
-  Monster(){
+  Monster()/* : name(20, ' '), desc(78, ' ')*/ {
     //do nothing
   }
 
   Monster(uint8_t r, uint8_t c, uint8_t t, uint8_t s, uint8_t pr, uint8_t pc){
     row = r;
     col = c;
-    type = t;
-    speed = s;
+    //type = t;
+    //speed = s;
     pc_row = pr;
     pc_col = pc;
+  }
+
+  bool dead(){
+    return false; //todo
   }
 };
 
@@ -144,7 +211,7 @@ class Dungeon {
   void save_map(char* filepath);
   int load_map(char* filepath);
 
-  //from pathing.h
+  //frxom pathing.h
   void weight_nontunnel(int weight[HEIGHT][WIDTH]);
   void weight_tunnel(int weight[HEIGHT][WIDTH]);
   void dijkstra(int dist[HEIGHT][WIDTH], int weight[HEIGHT][WIDTH]);
@@ -168,4 +235,8 @@ class Dungeon {
   int use_staircase(char stair);
   int pc_turn();
   void teleport();
+
+  //from loader.h
+  int load_monsters(string filepath);
+  int load_monster(ifstream *fp);
 };
