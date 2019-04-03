@@ -4,6 +4,9 @@ FLAGS = -lm -lncurses #UNUSED
 
 CC = g++
 
+testload: testload.cpp classes.h drats.h loader.h
+	$(CC) testload.cpp -o testload -lncurses
+
 #foggy: foggy.cpp $(DEPS)
 #	$(CC) foggy.cpp -o foggy -lm -lncurses
 
