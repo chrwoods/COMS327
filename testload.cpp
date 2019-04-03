@@ -23,4 +23,5 @@ int main(int argc, char* argv[]){
   }
   //print items
   rlg.print_items();
+  rlg.empty_map();
 }
