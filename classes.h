@@ -175,6 +175,31 @@ class Monster {
   bool boss(){ return (abilities & MON_BOSS) == MON_BOSS;}
 };
 
+class Item {
+ public:
+  uint8_t row;
+  uint8_t col;
+  
+  string name;
+  string desc;
+  string type;
+  short int color;
+  Dice hit;
+  Dice damage;
+  Dice dodge;
+  Dice def;
+  Dice weight;
+  Dice speed;
+  int attr;
+  Dice value;
+  bool art;
+  uint8_t rarity;
+
+  Item(){
+    attr = 0;
+  }
+};
+
 class Dungeon {
  public:
   uint8_t map[HEIGHT][WIDTH];
@@ -189,6 +214,7 @@ class Dungeon {
   Obj pc;
   int num_monsters;
   vector<Monster> monsters;
+  vector<Item> items;
   char background[HEIGHT][WIDTH];
   bool fog;
   char memory[HEIGHT][WIDTH];
@@ -255,4 +281,8 @@ class Dungeon {
   int load_monster(ifstream *fp);
   void print_monsters();
   void print_monster(int num);
+  int load_items(string filepath);
+  int load_item(ifstream *fp);
+  void print_items();
+  void print_item(int num);
 };
