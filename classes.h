@@ -228,7 +228,8 @@ class Item {
   Dice value;
   short int art; //0 if not artifact, 1 if artifact, >1 if placed
   uint8_t rarity;
-
+  char symbol;
+  
   Item(){
     attr = 0;
   }
