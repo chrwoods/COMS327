@@ -12,10 +12,10 @@ int Dungeon::move_pc(int direction){
   pc.row = row;
   pc.col = col;
   //unalive the monsters
-  for(int i = 0; i < num_monsters; i++){
+  for(int i = 0; i < monsters.size(); i++){
     if(monsters[i].row == row && monsters[i].col == col){
       kill_monster(i); //FATALITY
-      //i--; //technically we can break here, but this checks for monster overlap just in case
+      //soon enough this comment will turn into a combat command
     }
   }
   generate_paths(); //generate paths for new PC location
@@ -32,7 +32,9 @@ int Dungeon::use_staircase(char stair){
   uint8_t col = pc.col;
   generate_map_around_pc(-1); //generate new map randomly
   update_background();
-  for(int i = 0; i < num_monsters; i++) generate_monster(i);
+  int num_mons = monsters.size();
+  monsters.clear();
+  for(int i = 0; i < num_mons; i++) generate_monster();
   print_map();
   return 0;
 }
@@ -44,7 +46,7 @@ void Dungeon::teleport(){
   char screen[HEIGHT][WIDTH];
   for(int i = 0; i < HEIGHT; i++){
     for(int j = 0; j < WIDTH; j++){
-      screen[i][j] = mvinch(i, j);
+      screen[i][j] = mvinch(i, j); //save the screen
     }
   }
   Obj dest(pc.row, pc.col);
