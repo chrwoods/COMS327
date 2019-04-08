@@ -235,6 +235,29 @@ void Dungeon::print_monster(int num){
   cout << endl;
 }
 
+char item_symbol(string type){
+  if(type.compare("WEAPON") == 0) return '|';
+  else if(type.compare("OFFHAND") == 0) return ')'; 
+  else if(type.compare("RANGED") == 0) return '}';
+  else if(type.compare("ARMOR") == 0) return '[';
+  else if(type.compare("HELMET") == 0) return ']';
+  else if(type.compare("CLOAK") == 0) return '(';
+  else if(type.compare("GLOVES") == 0) return '{';
+  else if(type.compare("BOOTS") == 0) return '\\';
+  else if(type.compare("RING") == 0) return '=';
+  else if(type.compare("AMULET") == 0) return '"';
+  else if(type.compare("LIGHT") == 0) return '_';
+  else if(type.compare("SCROLL") == 0) return '~';
+  else if(type.compare("BOOK") == 0) return '?';
+  else if(type.compare("FLASK") == 0) return '!';
+  else if(type.compare("GOLD") == 0) return '$';
+  else if(type.compare("AMMUNITION") == 0) return '/';
+  else if(type.compare("FOOD") == 0) return ',';
+  else if(type.compare("WAND") == 0) return '-';
+  else if(type.compare("CONTAINER") == 0) return '%';
+  else return '*';
+}
+
 int Dungeon::load_items(string filepath){
   ifstream fp(filepath);
   if(!fp.is_open()){
@@ -282,6 +305,8 @@ int Dungeon::load_item(ifstream *fp){
     } else if(header.compare("TYPE") == 0){
       if((complete & 0x4) == 0x4) return -1; //field already filled
       item.type = line.substr(line.find_first_of(' ') + 1);
+      item.symbol = item_symbol(item.type);
+      if(item.symbol == '*') return -4; //item type unrecognized
       complete = complete | 0x4;
     } else if(header.compare("COLOR") == 0){
       if((complete & 0x8) == 0x8) return -1; //field already filled
@@ -417,3 +442,4 @@ void Dungeon::print_item(int num){
   cout << "Rarity: " << std::to_string(item_templates[num].rarity) << endl;
   cout << endl;
 }
+
