@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <sstream>
+#include <cstring>
 #include <vector>
 using namespace std;
 
@@ -146,6 +146,10 @@ class Lifeform {
   Lifeform(){
     //do nothing
   }
+  
+  bool dead(){
+    return hp <= 0;
+  }
 };
 
 class Monster {
@@ -165,11 +169,7 @@ class Monster {
   Monster() {
     placed = false;
   }
-
-  bool dead(){
-    return false; //todo
-  }
-
+  
   bool smart(){ return (abilities & MON_SMART) == MON_SMART;}
   bool telepathic(){ return (abilities & MON_TELEPATHIC) == MON_TELEPATHIC;}
   bool tunnel(){ return (abilities & MON_TUNNEL) == MON_TUNNEL;}
@@ -264,7 +264,7 @@ class Dungeon {
   vector<Monster> monster_templates;
   vector<Lifeform> monsters;
   vector<Item> item_templates;
-  vector<Collectibles> items;
+  vector<Collectible> items;
   char background[HEIGHT][WIDTH];
   bool fog;
   char memory[HEIGHT][WIDTH];
@@ -274,8 +274,6 @@ class Dungeon {
     rooms = (Room*)malloc(1);
     up = (Obj*)malloc(1);
     down = (Obj*)malloc(1);
-    num_monsters = 0;
-    //monsters = (Monster*)malloc(1);
     pc.row = 0;
     fog = true;
   }
