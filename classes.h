@@ -126,16 +126,30 @@ class Dice {
   }
 };
 
-class Monster {
+class Monster;
+
+class Lifeform {
  public:
   uint8_t row;
   uint8_t col;
   uint8_t pc_row;
   uint8_t pc_col;
+  Monster *src; //reference to template
+  //short int colors[8]; //max of 8 colors
+  //short int num_colors;
+  int speed;
+  //uint16_t abilities;
+  int hp;
+  Dice damage;
+  //char symbol;
 
-  uint8_t type;
-  //uint8_t speed;
+  Lifeform(){
+    //do nothing
+  }
+};
 
+class Monster {
+ public:
   string name;
   string desc;
   short int colors[8]; //max of 8 colors (technically 7, since black can't be placed
@@ -147,17 +161,8 @@ class Monster {
   char symbol;
   uint8_t rarity;
   
-  Monster()/* : name(20, ' '), desc(78, ' ')*/ {
+  Monster() {
     //do nothing
-  }
-
-  Monster(uint8_t r, uint8_t c, uint8_t t, uint8_t s, uint8_t pr, uint8_t pc){
-    row = r;
-    col = c;
-    //type = t;
-    //speed = s;
-    pc_row = pr;
-    pc_col = pc;
   }
 
   bool dead(){
@@ -173,13 +178,41 @@ class Monster {
   bool destroy(){ return (abilities & MON_DESTROY) == MON_DESTROY;}
   bool unique(){ return (abilities & MON_UNIQ) == MON_UNIQ;}
   bool boss(){ return (abilities & MON_BOSS) == MON_BOSS;}
+
+  Lifeform create(){
+    Lifeform l;
+    l.src = this;
+    l.speed = speed.roll();
+    l.hp = hp.roll();
+    l.damage = damage;
+    return l;
+  }
+};
+
+class Item;
+
+class Collectible {
+ public:
+  uint8_t row;
+  uint8_t col;
+  Item *src; //construction source
+  short int color;
+  int hit;
+  Dice damage;
+  int dodge;
+  int def;
+  int weight;
+  int speed;
+  int attr;
+  int value;
+
+  Collectible(){
+    //do nothing
+  }
 };
 
 class Item {
  public:
-  uint8_t row;
-  uint8_t col;
-  
   string name;
   string desc;
   string type;
@@ -197,6 +230,21 @@ class Item {
 
   Item(){
     attr = 0;
+  }
+
+  Collectible create(){
+    Collectible c;
+    c.src = this;
+    c.color = color;
+    c.hit = hit.roll();
+    c.damage = damage;
+    c.dodge = dodge.roll(); //the ultimate evasive maneuver
+    c.def = def.roll();
+    c.weight = weight.roll();
+    c.speed = speed.roll();
+    c.attr = attr;
+    c.value = value.roll();
+    return c;
   }
 };
 
