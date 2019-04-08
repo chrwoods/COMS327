@@ -1,17 +1,26 @@
-void Dungeon::generate_monster(int num){
-  monsters[num].type = rand() % 16;
-  monsters[num].speed = rand() % 16 + 5; //5-20
+void Dungeon::generate_monster(){
+  Lifeform mon;
+  while(1){ //choose the monster
+    int num = rand() % monster_templates.size();
+    if(monster_templates[num].src->unique() && monster_templates[num].placed) continue; //unique monster has been placed already
+    uint8_t rare = rand() % 100;
+    if(rare >= monster_templates[num].src->rarity) continue; //rare check failed
+    mon = monster_templates[num].create();
+    monster_templates[num].placed = true;
+    break;
+  }
   while(1){ //place the monster
     uint8_t row = rand() % HEIGHT;
     uint8_t col = rand() % WIDTH;
     if(map[row][col] != 0) continue;
     if(pc.row == row && pc.col == col) continue;
-    monsters[num].row = row;
-    monsters[num].col = col;
+    mon.row = row;
+    mon.col = col;
     break;
   }
-  monsters[num].pc_row = 0;
-  monsters[num].pc_col = 0;
+  mon.pc_row = 0;
+  mon.pc_col = 0;
+  monsters.push_back(mon);
 }
 
 int Dungeon::line_of_sight(int num){
@@ -43,57 +52,24 @@ int Dungeon::line_of_sight(int num){
   return 1;
 }
 
-/* This version of kill_monster removes it and reallocs from the monster pointer array, however this breaks turn ordering so it's deprecated (for now)
-void kill_monster(struct dungeon *rlg, int num){
-  if(num_monsters == 0){
-    printf("No monsters left.\n"); 
-    return;
-  }
-  if(num >= num_monsters){
-    printf("Trying to kill a nonexistent monster.\n");
-    return;
-  }
-  if(num_monsters == 1){
-    num_monsters = 0;
-    freemonsters;
-    return;
-  }
-  if(num_monsters - 1 == num){
-    num_monsters--;
-    monsters = realloc(monsters, num_monsters * sizeof(struct monster));
-    return;
-  }
-  num_monsters--;
-  monsters[num].row = monsters[num_monsters].row;
-  monsters[num].col = monsters[num_monsters].col;
-  monsters[num].type = monsters[num_monsters].type;
-  monsters[num].speed = monsters[num_monsters].speed;
-  monsters[num].pc_row = monsters[num_monsters].pc_row;
-  monsters[num].pc_col = monsters[num_monsters].pc_col;
-  monsters = realloc(monsters, num_monsters * sizeof(struct monster));
-}*/
-
 void Dungeon::kill_monster(int num){
-  monsters[num].speed = 0; //(dead monsters can't move)
+  monsters[num].hp = 0; //soon to be deprecated in 1.09
 }
   
 int Dungeon::move_monster(int num){
-  if(num < 0){//move player
-    //move_pc(rlg);
-    return 0;
-  }
+  if(num < 0 || num >= monsters.size()) return -1;
   //decide where to move
-  if((monsters[num].type & MON_TELEPATHIC) == MON_TELEPATHIC){
+  if(monsters[num].src->telepathic()){
     monsters[num].pc_row = pc.row;
     monsters[num].pc_col = pc.col;
   } else {
     if(line_of_sight(num)){
       monsters[num].pc_row = pc.row;
       monsters[num].pc_col = pc.col;
-    } else if((monsters[num].type & MON_SMART) != MON_SMART){
+    } else if(!monsters[num].src->smart()){
       monsters[num].pc_row = 0;
       monsters[num].pc_col = 0;
-    }
+    } //otherwise stored pc location will not change
   }
   
   //find the neighbors
@@ -102,7 +78,7 @@ int Dungeon::move_monster(int num){
   uint8_t col = monsters[num].col;
   for(int i = -1; i <= 1; i++){
     for(int j = -1; j <= 1; j++){
-      if((monsters[num].type & MON_TUNNEL) == MON_TUNNEL){
+      if(monsters[num].src->tunnel()){
 	neighbors[i + 1][j + 1] = t_path[row + i][col + j];
       } else {	
 	neighbors[i + 1][j + 1] = nt_path[row + i][col + j];
@@ -112,7 +88,7 @@ int Dungeon::move_monster(int num){
   
   //decide where to move
   int destination = 4; //center
-  if(monsters[num].pc_row == pc.row && monsters[num].pc_col == pc.col && ((monsters[num].type & MON_SMART) == MON_SMART)){
+  if(monsters[num].pc_row == pc.row && monsters[num].pc_col == pc.col && monsters[num].src->smart()){
     int shortest_dist = 17469; //arbitrarily large(ish)
     for(int i = 0; i < 9; i++){	
       if(neighbors[i / 3][i % 3] < shortest_dist && neighbors[i / 3][i % 3] >= 0){
@@ -143,7 +119,7 @@ int Dungeon::move_monster(int num){
   }
   
   //erratic behavior
-  if((monsters[num].type & MON_ERRATIC) == MON_ERRATIC && rand() % 2 == 1){
+  if(monsters[num].src->erratic() && rand() % 2 == 1){
     int counter = 0;
     while(1){
       if(counter++ > 50) { //checks for infinite loop from PC teleporting into rock
@@ -179,18 +155,17 @@ int Dungeon::move_monster(int num){
     col = monsters[num].col;
     //check combat
     if(row == pc.row && col == pc.col) return 1; //the player has been killed
-    for(int i = 0; i < num_monsters; i++){
-      if(num == i) continue; //suicide is not the answer, monsters can only commit homicide
+    for(int i = 0; i < monsters.size(); i++){
+      if(num == i) continue; //suicide is not the answer, monsters can only slay others
       if(monsters[i].row == row && monsters[i].col == col){
 	kill_monster(i); //FATALITY
       }
     }
   }
-  char type = monsters[num].type < 10 ? (char)(48 + monsters[num].type) : (char)(87 + monsters[num].type);
   if(!fog || visible[row][col]) {
-    attron(COLOR_PAIR(WHITE_PAIR));
-    mvaddch(row, col, type); //add monster at new spot
-    attroff(COLOR_PAIR(GRAY_PAIR));
+    attron(COLOR_PAIR(monsters[i].src->colors[0])); //for now we will only print the first color (TODO)
+    mvaddch(row, col, monsters[i].src->symbol); //add monster at new spot
+    attroff(COLOR_PAIR(monsters[i].src->colors[0]));
   }
   refresh();
   return 0;
@@ -212,9 +187,9 @@ void Dungeon::print_monster_list(){
   mvwprintw(list, 22, col, "+------------------------------+");
   int key;
   int alive_monsters = 0;
-  int monster_array_locs[num_monsters];
-  for(int i = 0; i < num_monsters; i++){
-    if(monsters[i].speed != 0) monster_array_locs[alive_monsters++] = i;
+  int monster_array_locs[monsters.size()];
+  for(int i = 0; i < monsters.size(); i++){
+    if(monsters[i].hp != 0) monster_array_locs[alive_monsters++] = i;
   }
   int page = 0;
   int num_pages = alive_monsters / 6 + (alive_monsters % 6 > 0);
@@ -241,8 +216,13 @@ void Dungeon::print_monster_list(){
 	horz[0] = 'w';
 	horz[1] = 'e';
       }
-      mvwprintw(list, 9 + i * 2, col, "|     %x, %2d %s, %2d %s     |",
-		monsters[num].type, v_dist, vert, h_dist, horz);
+      mvwprintw(list, 9 + i * 2, col, "|     +, %2d %s, %2d %s     |", v_dist, vert, h_dist, horz);
+      //print monster symbol in its own color
+      attroff(COLOR_PAIR(WHITE_PAIR));
+      attron(COLOR_PAIR(monsters[num].src->colors[0]));
+      mvwaddch(list, 9 + i * 2, col + 6, monsters[num].src->symbol);
+      attroff(COLOR_PAIR(monsters[num].src->colors[0]));
+      attron(COLOR_PAIR(WHITE_PAIR));
       mvwprintw(list, 10 + i * 2, col, "|                              |");
     }
     if(alive_monsters <= 0) page = -1;
@@ -251,7 +231,7 @@ void Dungeon::print_monster_list(){
     key = getch();
     if(key == KEY_DOWN && (page < num_pages - 1)) page++;
     if(key == KEY_UP && (page > 0)) page--;
-  }while(key != 27); //27 = escape key (also is alt key, which will also close monster list)
+  }while(key != 27); //27 = escape key (also is alt key, which will also close monster list), causing a ~.5 second pause
   wclear(list);
   delwin(list);
   clear();
