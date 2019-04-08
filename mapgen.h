@@ -231,10 +231,9 @@ void Dungeon::old_print_map(){ //deprecated
   //place player character
   chargrid[pc.row][pc.col] = '@';
   //place monsters
-  char monstersyms[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-  for(int i = 0; i < num_monsters; i++){
-    if((monsters)[i].speed == 0) continue; //dead monster
-    chargrid[(monsters)[i].row][(monsters)[i].col] = monstersyms[(monsters)[i].type];
+  for(int i = 0; i < monsters.size(); i++){
+    if((monsters)[i].dead()) continue; //dead monster
+    chargrid[(monsters)[i].row][(monsters)[i].col] = monsters[i].src->symbol;
   }
   //print the character grid
   for(int i = 0; i < HEIGHT; i++){
