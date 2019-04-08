@@ -2,9 +2,9 @@ void Dungeon::generate_monster(){
   Lifeform mon;
   while(1){ //choose the monster
     int num = rand() % monster_templates.size();
-    if(monster_templates[num].src->unique() && monster_templates[num].placed) continue; //unique monster has been placed already
+    if(monster_templates[num].unique() && monster_templates[num].placed) continue; //unique monster has been placed already
     uint8_t rare = rand() % 100;
-    if(rare >= monster_templates[num].src->rarity) continue; //rare check failed
+    if(rare >= monster_templates[num].rarity) continue; //rare check failed
     mon = monster_templates[num].create();
     monster_templates[num].placed = true;
     break;
@@ -163,9 +163,9 @@ int Dungeon::move_monster(int num){
     }
   }
   if(!fog || visible[row][col]) {
-    attron(COLOR_PAIR(monsters[i].src->colors[0])); //for now we will only print the first color (TODO)
-    mvaddch(row, col, monsters[i].src->symbol); //add monster at new spot
-    attroff(COLOR_PAIR(monsters[i].src->colors[0]));
+    attron(COLOR_PAIR(monsters[num].src->colors[0])); //for now we will only print the first color (TODO)
+    mvaddch(row, col, monsters[num].src->symbol); //add monster at new spot
+    attroff(COLOR_PAIR(monsters[num].src->colors[0]));
   }
   refresh();
   return 0;
