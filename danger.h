@@ -98,7 +98,7 @@ int Dungeon::move_monster(int num){
 	destination = i;
       }
     }
-  } else if(monsters[num].pc_row + monsters[num].pc_col > 0){ //if there is a stored PC location
+  } else if(monsters[num].pc_row > 0){ //if there is a stored PC location
     int v_dist = monsters[num].pc_row - row;
     int h_dist = monsters[num].pc_col - col;
     int v_dir = 0;
@@ -123,7 +123,7 @@ int Dungeon::move_monster(int num){
     int counter = 0;
     while(1){
       if(counter++ > 50) { //checks for infinite loop from PC teleporting into rock
-	destination = 5;
+	destination = 4;
 	break;
       }
       destination = rand() % 9;
@@ -172,8 +172,8 @@ int Dungeon::move_monster(int num){
 }
 
 void Dungeon::print_monster_list(){
-  attron(COLOR_PAIR(WHITE_PAIR));
   WINDOW *list = newwin(HEIGHT + 3, WIDTH, 0, 0);
+  wattron(list, COLOR_PAIR(WHITE_PAIR));
   int col = 17;
   mvwprintw(list, 0, col, "                           _                ");
   mvwprintw(list, 1, col, "                          | |               ");
@@ -218,11 +218,11 @@ void Dungeon::print_monster_list(){
       }
       mvwprintw(list, 9 + i * 2, col, "|     +, %2d %s, %2d %s     |", v_dist, vert, h_dist, horz);
       //print monster symbol in its own color
-      attroff(COLOR_PAIR(WHITE_PAIR));
-      attron(COLOR_PAIR(monsters[num].src->colors[0]));
+      wattroff(list, COLOR_PAIR(WHITE_PAIR));
+      wattron(list, COLOR_PAIR(monsters[num].src->colors[0]));
       mvwaddch(list, 9 + i * 2, col + 6, monsters[num].src->symbol);
-      attroff(COLOR_PAIR(monsters[num].src->colors[0]));
-      attron(COLOR_PAIR(WHITE_PAIR));
+      wattroff(list, COLOR_PAIR(monsters[num].src->colors[0]));
+      wattron(list, COLOR_PAIR(WHITE_PAIR));
       mvwprintw(list, 10 + i * 2, col, "|                              |");
     }
     if(alive_monsters <= 0) page = -1;
@@ -232,10 +232,10 @@ void Dungeon::print_monster_list(){
     if(key == KEY_DOWN && (page < num_pages - 1)) page++;
     if(key == KEY_UP && (page > 0)) page--;
   }while(key != 27); //27 = escape key (also is alt key, which will also close monster list), causing a ~.5 second pause
+  wattroff(list, COLOR_PAIR(WHITE_PAIR));  
   wclear(list);
   delwin(list);
   clear();
-  attroff(COLOR_PAIR(WHITE_PAIR));
   print_map();
 }
     
