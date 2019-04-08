@@ -7,8 +7,9 @@
 #define MAGENTA_PAIR 5
 #define YELLOW_PAIR 6
 #define WHITE_PAIR 7
-#define GRAY_PAIR 8
-#define GREY_PAIR 8 //this is for the brits
+#define BLACK_PAIR 8
+#define GRAY_PAIR 9
+#define GREY_PAIR 9 //this is for the brits
 
 void drats(){
   initscr(); //if you don't do this, the terrorists win
@@ -17,7 +18,7 @@ void drats(){
   keypad(stdscr, TRUE); //allows arrow keys and special characters
   curs_set(FALSE); //bye bye mr. cursor
   nodelay(stdscr, TRUE); //sends key input instantly, doesn't buffer keys
-  if(has_colors()) start_color(); //everything the light touches is yours, simba (note: from here on out we assume that the terminal supports colors, because it's 2019 and if it doesn't, the program deserves not to compile.
+  if(has_colors()) start_color(); //everything the light touches is yours, simba (note: from here on out we assume that the terminal supports colors, because it's 2019 and if it doesn't, the program deserves not to compile.)
   init_pair(BLUE_PAIR, COLOR_BLUE + 8, COLOR_BLACK);
   init_pair(GREEN_PAIR, COLOR_GREEN + 8, COLOR_BLACK);
   init_pair(CYAN_PAIR, COLOR_CYAN + 8, COLOR_BLACK);
@@ -25,6 +26,7 @@ void drats(){
   init_pair(MAGENTA_PAIR, COLOR_MAGENTA + 8, COLOR_BLACK);
   init_pair(YELLOW_PAIR, COLOR_YELLOW + 8, COLOR_BLACK);
   init_pair(WHITE_PAIR, COLOR_WHITE + 8, COLOR_BLACK);
+  init_pair(BLACK_PAIR, COLOR_BLACK + 8, COLOR_BLACK); //identical to gray currently
   init_pair(GRAY_PAIR, COLOR_BLACK + 8, COLOR_BLACK); //the 8 is for intensity bit
   
   //pardon my french, but WINDOW objects can die in a fire
@@ -109,14 +111,15 @@ void Dungeon::update_fog(){
       }
     }
   }
+  attroff(COLOR_PAIR(WHITE_PAIR));
   //place monsters
-  char monstersyms[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-  for(int i = 0; i < num_monsters; i++){
+  for(int i = 0; i < monsters.size(); i++){
     if(monsters[i].dead()) continue; //dead monster
     if(!visible[monsters[i].row][monsters[i].col]) continue; //too far
-    mvaddch(monsters[i].row, monsters[i].col, monstersyms[monsters[i].type]);
+    attron(COLOR_PAIR(monsters[i].src->colors[0]));
+    mvaddch(monsters[i].row, monsters[i].col, monsters[i].src->symbol);
+    attroff(COLOR_PAIR(monsters[i].src->colors[0]));
   }
-  attroff(COLOR_PAIR(WHITE_PAIR));
 }
 
 void Dungeon::print_fog(){
@@ -134,14 +137,15 @@ void Dungeon::print_fog(){
   //place player character
   attron(COLOR_PAIR(WHITE_PAIR));
   mvaddch(pc.row, pc.col, '@');
+  attroff(COLOR_PAIR(WHITE_PAIR));
   //place monsters
-  char monstersyms[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-  for(int i = 0; i < num_monsters; i++){
+  for(int i = 0; i < monsters.size(); i++){
     if(monsters[i].dead()) continue; //dead monster
     if(!visible[monsters[i].row][monsters[i].col]) continue; //too far
-    mvaddch(monsters[i].row, monsters[i].col, monstersyms[monsters[i].type]);
+    attron(COLOR_PAIR(monsters[i].src->colors[0]));
+    mvaddch(monsters[i].row, monsters[i].col, monsters[i].src->symbol);
+    attroff(COLOR_PAIR(monsters[i].src->colors[0]));
   }
-  attroff(COLOR_PAIR(WHITE_PAIR));
   refresh();
 }
       
@@ -160,13 +164,14 @@ void Dungeon::print_map(){
   }
   //place player character
   mvaddch(pc.row, pc.col, '@');
-  //place monsters
-  char monstersyms[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-  for(int i = 0; i < num_monsters; i++){
-    if(monsters[i].dead()) continue; //dead monster
-    mvaddch(monsters[i].row, monsters[i].col, monstersyms[monsters[i].type]);
-  }
   attroff(COLOR_PAIR(WHITE_PAIR));
+  //place monsters
+  for(int i = 0; i < monsters.size(); i++){
+    if(monsters[i].dead()) continue; //dead monster
+    attron(COLOR_PAIR(monsters[i].src->colors[0]));
+    mvaddch(monsters[i].row, monsters[i].col, monsters[i].src->symbol);
+    attroff(COLOR_PAIR(monsters[i].src->colors[0]));
+  }
   refresh();
 }
 
