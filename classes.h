@@ -159,10 +159,11 @@ class Monster {
   Dice hp;
   Dice damage;
   char symbol;
+  bool placed; //for unique monsters
   uint8_t rarity;
   
   Monster() {
-    //do nothing
+    placed = false;
   }
 
   bool dead(){
@@ -225,7 +226,7 @@ class Item {
   Dice speed;
   int attr;
   Dice value;
-  bool art;
+  short int art; //0 if not artifact, 1 if artifact, >1 if placed
   uint8_t rarity;
 
   Item(){
@@ -260,9 +261,10 @@ class Dungeon {
   int num_down;
   Obj *down;
   Obj pc;
-  int num_monsters;
-  vector<Monster> monsters;
-  vector<Item> items;
+  vector<Monster> monster_templates;
+  vector<Lifeform> monsters;
+  vector<Item> item_templates;
+  vector<Collectibles> items;
   char background[HEIGHT][WIDTH];
   bool fog;
   char memory[HEIGHT][WIDTH];
@@ -306,7 +308,7 @@ class Dungeon {
   void generate_paths();
 
   //from danger.h
-  void generate_monster(int num);
+  void generate_monster();
   int line_of_sight(int num);
   void kill_monster(int num);
   int move_monster(int num);
