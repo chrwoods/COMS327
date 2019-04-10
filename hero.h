@@ -35,6 +35,9 @@ int Dungeon::use_staircase(char stair){
   int num_mons = monsters.size();
   monsters.clear();
   for(int i = 0; i < num_mons; i++) generate_monster();
+  int num_items = items.size();
+  items.clear();
+  for(int i = 0; i < num_items; i++) generate_item();
   print_map();
   return 0;
 }
