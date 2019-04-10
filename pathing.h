@@ -17,6 +17,15 @@ void Dungeon::weight_tunnel(int weight[HEIGHT][WIDTH]){
   }
 }
 
+void Dungeon::weight_pass(int weight[HEIGHT][WIDTH]){
+  for(int i = 0; i < HEIGHT; i++){
+    for(int j = 0; j < WIDTH; j++){
+      if(map[i][j] == 255) weight[i][j] = -2;
+      else weight[i][j] = 1;
+    }
+  }
+}
+
 void Dungeon::dijkstra(int dist[HEIGHT][WIDTH], int weight[HEIGHT][WIDTH]){
   PQueue q(sizeof(uint16_t));  
   dist[pc.row][pc.col] = 0;
@@ -68,6 +77,9 @@ void Dungeon::generate_paths(){
   //make tunneling path
   weight_tunnel(weight);
   dijkstra(t_path, weight);
+  //make passthrough path (aka distance to player character)
+  weight_pass(weight);
+  dijkstra(p_path, weight);
 }
 
 void print_path(int path[HEIGHT][WIDTH]){
