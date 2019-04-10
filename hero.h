@@ -97,6 +97,7 @@ void Dungeon::teleport(){
     }
   }
   fog = stored_fog;
+  generate_paths(); //generate paths for new PC location
   if(!fog) update_fog();
   print_map();
 }
