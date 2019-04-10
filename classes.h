@@ -334,4 +334,7 @@ class Dungeon {
   int load_item(ifstream *fp);
   void print_items();
   void print_item(int num);
+
+  //from itemize.h
+  void generate_item();
 };
