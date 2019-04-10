@@ -16,6 +16,7 @@ int main(int argc, char *argv[]){
   int save = 0;
   int load = 0;
   int num_mons = DEFAULT_MONSTERS;
+  int num_items = DEFAULT_ITEMS;
   if(argc > 1){
     for(int i = 1; i < argc; i++){
       if(std::strcmp(argv[i], "--save") == 0) save++;
@@ -46,6 +47,21 @@ int main(int argc, char *argv[]){
 	  return -1;
 	}
 	num_mons = atoi(argv[i]);
+      }else if(std::strcmp(argv[i], "--numitem") == 0){
+	if(i + 1 >= argc) {
+	  printf("No number given after numitem flag.\n");
+	  return -1;
+	}
+	i++;
+	if(atoi(argv[i]) == 0 && argv[i][0] != '0'){
+	  printf("Argument directly after numitem flag was not a number.\n");
+	  return -1;
+	}
+	if(atoi(argv[i]) < 0){
+	  printf("Given number of items cannot be negative.\n");
+	  return -1;
+	}
+	num_items = atoi(argv[i]);
       }else{
         printf("Flag \'%s\' unrecognized.\n", argv[i]);
         return -1;
@@ -79,7 +95,7 @@ int main(int argc, char *argv[]){
   for(int i = 0; i < num_mons; i++){
     rlg.generate_monster();
   }
-  for(int i = 0; i < 10; i++){ //give this a value eventually, chris
+  for(int i = 0; i < num_items; i++){
     rlg.generate_item();
   }
   //print map
