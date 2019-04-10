@@ -64,8 +64,8 @@ void Dungeon::teleport(){
     else if(key == '8' || key == 'k') direction = 8;
     else if(key == '9' || key == 'u') direction = 9;
     else if(key == 'r'){
-      dest.row = 1 + rand() % (HEIGHT - 1);
-      dest.col = 1 + rand() % (WIDTH - 1);
+      dest.row = 1 + rand() % (HEIGHT - 2);
+      dest.col = 1 + rand() % (WIDTH - 2);
       key = 't';
     }
     if(key == 't'){

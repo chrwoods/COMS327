@@ -1,8 +1,8 @@
 void Dungeon::generate_map(int seed){
   if(seed < 0) seed = time(NULL); //if given seed is negative, pick random seed
   srand(seed);
-  pc.row = 1 + rand() % (HEIGHT - 1);
-  pc.col = 1 + rand() % (WIDTH - 1);
+  pc.row = 1 + rand() % (HEIGHT - 2);
+  pc.col = 1 + rand() % (WIDTH - 2);
   pc.seed = seed;
   generate_map_around_pc(seed);
 }
