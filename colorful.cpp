@@ -8,6 +8,7 @@
 #include "ascii.h"
 #include "hero.h"
 #include "loader.h"
+#include "itemize.h"
 
 int main(int argc, char *argv[]){
   Dungeon rlg;
@@ -77,6 +78,9 @@ int main(int argc, char *argv[]){
   }
   for(int i = 0; i < num_mons; i++){
     rlg.generate_monster();
+  }
+  for(int i = 0; i < 10; i++){ //give this a value eventually, chris
+    rlg.generate_item();
   }
   //print map
   drats();
