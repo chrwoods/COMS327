@@ -78,7 +78,9 @@ int Dungeon::move_monster(int num){
   uint8_t col = monsters[num].col;
   for(int i = -1; i <= 1; i++){
     for(int j = -1; j <= 1; j++){
-      if(monsters[num].src->tunnel()){
+      if(monsters[num].src->pass()){
+	neighbors[i + 1][j + 1] = p_path[row + i][col + j];
+      } else if(monsters[num].src->tunnel()){
 	neighbors[i + 1][j + 1] = t_path[row + i][col + j];
       } else {	
 	neighbors[i + 1][j + 1] = nt_path[row + i][col + j];
@@ -141,14 +143,14 @@ int Dungeon::move_monster(int num){
     mvaddch(row, col, memory[row][col]);
     attroff(COLOR_PAIR(GRAY_PAIR));
   }
-  if(map[row - 1 + destination / 3][col - 1 + destination % 3] > 0){
+  if(!monsters[num].src->pass() && map[row - 1 + destination / 3][col - 1 + destination % 3] > 0){
     if(map[row - 1 + destination / 3][col - 1 + destination % 3] < 85)
       map[row - 1 + destination / 3][col - 1 + destination % 3] = 0;
     else map[row - 1 + destination / 3][col - 1 + destination % 3] -= 85;
     generate_paths(); //generate new paths because hardness changed
     update_background(); //update background because of new possible corridor
   }
-  if(map[row - 1 + destination / 3][col - 1 + destination % 3] == 0){
+  if(monsters[num].src->pass() || map[row - 1 + destination / 3][col - 1 + destination % 3] == 0){
     monsters[num].row += (destination / 3) - 1;
     monsters[num].col += (destination % 3) - 1;
     row = monsters[num].row;

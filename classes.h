@@ -256,6 +256,7 @@ class Dungeon {
   uint8_t map[HEIGHT][WIDTH];
   int nt_path[HEIGHT][WIDTH];
   int t_path[HEIGHT][WIDTH];
+  int p_path[HEIGHT][WIDTH];
   int num_rooms;
   Room *rooms;
   int num_up;
@@ -301,9 +302,10 @@ class Dungeon {
   void save_map(char* filepath);
   int load_map(char* filepath);
 
-  //frxom pathing.h
+  //from pathing.h
   void weight_nontunnel(int weight[HEIGHT][WIDTH]);
   void weight_tunnel(int weight[HEIGHT][WIDTH]);
+  void weight_pass(int weight[HEIGHT][WIDTH]);
   void dijkstra(int dist[HEIGHT][WIDTH], int weight[HEIGHT][WIDTH]);
   void generate_paths();
 
