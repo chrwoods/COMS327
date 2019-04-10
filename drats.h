@@ -58,6 +58,12 @@ void Dungeon::update_background(){
   for(int i = 0; i < num_down; i++){
     background[down[i].row][down[i].col] = '>';
   }
+  //place items
+  for(int i = 0; i < items.size(); i++){
+    char bg = background[items[i].row][items[i].col];
+    if(bg == '.' || bg == '#') background[items[i].row][items[i].col] = items[i].src->symbol; //checks if placing item where an item is not
+    else background[items[i].row][items[i].col] = '&'; //stack
+  }
 }
 
 void Dungeon::update_fog(){
@@ -112,6 +118,17 @@ void Dungeon::update_fog(){
     }
   }
   attroff(COLOR_PAIR(WHITE_PAIR));
+  //color items
+  for(int i = 0; i < items.size(); i++){
+    if(!visible[items[i].row][items[i].col]) continue; //too far
+    attron(COLOR_PAIR(items[i].src->color));
+    mvaddch(items[i].row, items[i].col, background[items[i].row][items[i].col]);
+    attroff(COLOR_PAIR(items[i].src->color));
+  }
+  //place player character
+  attron(COLOR_PAIR(WHITE_PAIR));
+  mvaddch(pc.row, pc.col, '@');
+  attroff(COLOR_PAIR(WHITE_PAIR));
   //place monsters
   for(int i = 0; i < monsters.size(); i++){
     if(monsters[i].dead()) continue; //dead monster
@@ -134,6 +151,13 @@ void Dungeon::print_fog(){
     }
   }
   attroff(COLOR_PAIR(GRAY_PAIR));
+  //color items
+  for(int i = 0; i < items.size(); i++){
+    if(!visible[items[i].row][items[i].col]) continue; //too far
+    attron(COLOR_PAIR(items[i].src->color));
+    mvaddch(items[i].row, items[i].col, background[items[i].row][items[i].col]);
+    attroff(COLOR_PAIR(items[i].src->color));
+  }
   //place player character
   attron(COLOR_PAIR(WHITE_PAIR));
   mvaddch(pc.row, pc.col, '@');
@@ -162,7 +186,15 @@ void Dungeon::print_map(){
       mvaddch(i, j, background[i][j]);
     }
   }
+  attroff(COLOR_PAIR(WHITE_PAIR));
+  //color items
+  for(int i = 0; i < items.size(); i++){
+    attron(COLOR_PAIR(items[i].src->color));
+    mvaddch(items[i].row, items[i].col, background[items[i].row][items[i].col]);
+    attroff(COLOR_PAIR(items[i].src->color));
+  }
   //place player character
+  attron(COLOR_PAIR(WHITE_PAIR));
   mvaddch(pc.row, pc.col, '@');
   attroff(COLOR_PAIR(WHITE_PAIR));
   //place monsters
