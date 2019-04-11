@@ -43,3 +43,9 @@ Changelog:
 04/02/2019 - began writing the loading of monsters into a header called loader.h. This also resulted in the creation of testload.cpp in order to test the loading of the monsters. Loading was mostly completed, save for printing the output for the gracious TAs, and reading in abilities.
 
 04/03/2019 - finished writing the loading of monsters and wrote functions to print the stored data. I was running into segfaults, but according to literally everyone on stackexchange I was being stupid for using a pointer array of classes, so I switched to a vector to hold the monsters and hooray, no more sefaults. I had extra time, so I wrote the item loading and printing as well. I copied testload.cpp to rlg327.cpp for the ease of grading, and updated the Makefile and README accordingly.
+
+04/08/2019 - created Collectible and Lifeform classes to act as instances of Items and Monsters, respectively. Updated all files to work with the new Monster schema, including fixing movement and print functions. Changed monsters to print in color, and added support for generating them uniquely.
+
+04/09/2019 - implemented the generation of items through itemize.h, added the printing of items on the map. Added stack functioinality if items are on top of eachother on the map. Added --numitem flag which functions nearly identically to --nummon, save for updating items instead of monsters.
+
+04/10/2019 - fixed a few miscellaneous bugs including an annoying off-by-one error, added functionality for pass-through and destroy attributes of a monster (pickup will be implemented next week). Updated functionality for regeneration on staircase use. Copied colorful.cpp to rlg327.cpp for ease of grading. Updated Makefile and README.
