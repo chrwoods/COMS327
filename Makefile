@@ -4,13 +4,13 @@ FLAGS = -lm -lncurses #UNUSED
 
 CC = g++
 
-colorful: colorful.cpp $(DEPS)
-	$(CC) colorful.cpp -o colorful -lm -lncurses
-
 rlg327: rlg327.cpp $(DEPS)
 	$(CC) rlg327.cpp -o rlg327 -lm -lncurses
 
 all: rlg327 mapbuild pathfind ncursed testload colorful
+
+colorful: colorful.cpp $(DEPS)
+	$(CC) colorful.cpp -o colorful -lm -lncurses
 
 testload: testload.cpp classes.h drats.h loader.h
 	$(CC) testload.cpp -o testload -lncurses
