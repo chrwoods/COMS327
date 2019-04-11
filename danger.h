@@ -169,6 +169,19 @@ int Dungeon::move_monster(int num){
     mvaddch(row, col, monsters[num].src->symbol); //add monster at new spot
     attroff(COLOR_PAIR(monsters[num].src->colors[0]));
   }
+  //destroy checking
+  if(monsters[num].src->destroy()){
+    char bg = background[row][col];
+    if(bg != ' ' && bg != '.' && bg != '#' && bg != '<' && bg != '>'){ //if new monster location containts an item (is not empty space)
+      for(int i = 0; i < items.size(); i++){
+	if(row == items[i].row && col == items[i].col){
+	  items.erase(items.begin() + i--); //remove the item from the vector and step backwards
+	}
+      }
+      update_background(); //update background to reflect item change
+      print_map(); //print new map
+    }
+  }
   refresh();
   return 0;
 }
