@@ -268,6 +268,7 @@ class Dungeon {
   vector<Lifeform> monsters;
   vector<Item> item_templates;
   vector<Collectible> items;
+  uint8_t num_items;
   char background[HEIGHT][WIDTH];
   bool fog;
   char memory[HEIGHT][WIDTH];
@@ -279,6 +280,7 @@ class Dungeon {
     down = (Obj*)malloc(1);
     pc.row = 0;
     fog = true;
+    num_items = DEFAULT_ITEMS;
   }
 
   void empty_map(){
