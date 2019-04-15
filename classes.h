@@ -251,6 +251,24 @@ class Item {
   }
 };
 
+class Player {
+ public:
+  uint8_t row;
+  uint8_t col;
+  int hp;
+  Dice damage;
+  int speed;
+  Collectible *carry[10];
+  Collectible *equip[12];
+
+  Player(){
+    for(int i = 0; i < 12; i++){
+      if(i < 10) carry[i] = 0;
+      equip[i] = 0;
+    }
+  }
+};
+
 class Dungeon {
  public:
   uint8_t map[HEIGHT][WIDTH];
@@ -263,7 +281,7 @@ class Dungeon {
   Obj *up;
   int num_down;
   Obj *down;
-  Obj pc;
+  Player pc;
   vector<Monster> monster_templates;
   vector<Lifeform> monsters;
   vector<Item> item_templates;
@@ -340,6 +358,7 @@ class Dungeon {
   void print_items();
   void print_item(int num);
 
-  //from itemize.h
+  //from backpack.h
   void generate_item();
+  void print_inventory();
 };
