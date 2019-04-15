@@ -1,13 +1,16 @@
-DEPS = classes.h drats.h mapgen.h mapsl.h priorityq.h pathing.h ascii.h danger.h hero.h loader.h
+DEPS = classes.h drats.h mapgen.h mapsl.h priorityq.h pathing.h ascii.h danger.h hero.h loader.h backpack.h
 
 FLAGS = -lm -lncurses #UNUSED
 
 CC = g++
 
+brawl: brawl.cpp $(DEPS)
+	$(CC) brawl.cpp -o brawl -lm -lncurses
+
 rlg327: rlg327.cpp $(DEPS)
 	$(CC) rlg327.cpp -o rlg327 -lm -lncurses
 
-all: rlg327 mapbuild pathfind ncursed testload colorful
+all: rlg327 mapbuild pathfind ncursed testload colorful brawl
 
 colorful: colorful.cpp $(DEPS)
 	$(CC) colorful.cpp -o colorful -lm -lncurses
@@ -31,4 +34,4 @@ mapbuild: mapbuild.cpp $(DEPS)
 	$(CC) mapbuild.cpp -o mapbuild -lm
 
 clean:
-	rm -f rlg327 colorful testload ncursed pathfind mapbuild *~
+	rm -f rlg327 brawl colorful testload ncursed pathfind mapbuild *~
