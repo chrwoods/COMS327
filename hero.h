@@ -136,7 +136,8 @@ void Dungeon::look_at_monster(){
       for(int i = 0; i < monsters.size(); i++){
 	if(dest.row != monsters[i].row || dest.col != monsters[i].col) continue;
 	if(monsters[i].dead()) continue;
-	monsters[i].display_info();
+        display_monster_info(i);
+	mvaddch(dest.row, dest.col, '*');
 	looked = true;
       }
       if(!looked) update_status_text("   No monster found to look at.");
@@ -145,7 +146,7 @@ void Dungeon::look_at_monster(){
       int v_dir = 1 - ((direction - 1) / 3);
       int h_dir = ((direction - 1) % 3) - 1;
       if(dest.row + v_dir <= 0 || dest.row + v_dir >= HEIGHT - 1 || dest.col + h_dir <= 0 || dest.col + h_dir >= WIDTH - 1){
-	update_status_text("   You cannot teleport out of the map!");
+	update_status_text("   You cannot select outside of the map!");
 	continue;
       }
       attron(screen[dest.row][dest.col] & A_COLOR);
