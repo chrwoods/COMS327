@@ -151,6 +151,9 @@ class Lifeform {
   bool dead(){
     return hp <= 0;
   }
+
+  //from danger.h
+  void display_info();
 };
 
 class Monster {
@@ -347,7 +350,8 @@ class Dungeon {
   int use_staircase(char stair);
   int pc_turn();
   void teleport();
-
+  void look_at_monster();
+  
   //from loader.h
   int load_monsters(string filepath);
   int load_monster(ifstream *fp);
