@@ -361,4 +361,5 @@ class Dungeon {
   //from backpack.h
   void generate_item();
   void print_inventory();
+  void print_equipment();
 };
