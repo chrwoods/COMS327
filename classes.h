@@ -364,4 +364,8 @@ class Dungeon {
   void generate_item();
   void print_inventory();
   void print_equipment();
+  void pickup_items();
+  void takeoff_item();
+  void drop_item();
+  void destroy_item();
 };

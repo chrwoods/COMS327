@@ -199,6 +199,7 @@ int Dungeon::pc_turn(){
     else if(key == 'i') print_inventory();
     else if(key == 'e') print_equipment();
     else if(key == 'L') look_at_monster();
+    else if(key == ',') pickup_items();
     else if(key == 'q' || key == 'Q') return -1;
     if(direction > 0){
       if(move_pc(direction) == 0){

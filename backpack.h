@@ -133,3 +133,44 @@ void Dungeon::print_equipment(){
   print_map();
   refresh();
 }  
+
+void Dungeon::pickup_items(){
+  //check if PC is on any items
+  /*char bg = background[pc.row][pc.col];
+  if(bg == '<' || bg == '>' || bg == ' ' || bg == '.' || bg == '#'){
+    update_status_text("   No items were found to pick up.");
+    return;
+  }*/
+  //find pointers to items under PC
+  vector<int> found_items; 
+  for(int i = 0; i < items.size(); i++){
+    if(items[i].row != pc.row || items[i].col != pc.col) continue;
+    found_items.push_back(i);
+  }
+  if(found_items.size() <= 0){
+    update_status_text("   No items were found to pick up.");
+    return;
+  }
+  //open pickup menu
+  WINDOW *list = newwin(22, 70, 1, 5);
+  wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
+  short inv_start = 1;
+  mvwprintw(list, 0, 27, "[ Pickup Menu ]");
+  for(int i = 0; i < found_items.size(); i++){
+    int it_num = found_items[i];
+    if(items[it_num].row != pc.row || items[it_num].col != pc.col) continue;
+    mvwprintw(list, inv_start + i, 2, "%1d - (empty)", i);
+    wattron(list, COLOR_PAIR(items[it_num].src->color));
+    mvwaddch(list, inv_start + i, 6, items[it_num].src->symbol);
+    wattroff(list, COLOR_PAIR(items[it_num].src->color));
+    mvwprintw(list, inv_start + i, 7, ", %s, TYPE: %s, HIT: %d, DAM: %s,", items[it_num].src->name.c_str(), items[it_num].src->type.c_str(), items[it_num].hit, items[it_num].src->damage.toString().c_str());
+    mvwprintw(list, ++inv_start + i, 6, "DODGE: %d, DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", items[it_num].dodge, items[it_num].def, items[it_num].weight, items[it_num].speed, items[it_num].attr, items[it_num].value);
+  }
+  wrefresh(list);
+  while(getch() != 27){}
+  wclear(list);
+  wrefresh(list);
+  delwin(list);
+  print_map();
+  refresh();
+}
