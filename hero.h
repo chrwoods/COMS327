@@ -137,9 +137,8 @@ int Dungeon::pc_turn(){
       teleport();
       return 0;
     }
-    else if(key == 'i'){
-      print_inventory();
-    }
+    else if(key == 'i') print_inventory();
+    else if(key == 'e') print_equipment();
     else if(key == 'q' || key == 'Q') return -1;
     if(direction > 0){
       if(move_pc(direction) == 0){
