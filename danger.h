@@ -254,6 +254,44 @@ void Dungeon::print_monster_list(){
   print_map();
 }
     
-    
+void Dungeon::display_monster_info(int num){
+  if(num < 0 || num >= monsters.size()) return;
+  WINDOW *list = newwin(15, 40, 4, 20);
+  wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
+  mvwprintw(list, 1, 1, "x - %s", monsters[num].src->name.c_str());
+  wattron(list, COLOR_PAIR(monsters[num].src->colors[0]));
+  mvwaddch(list, 1, 1, monsters[num].src->symbol);
+  wattroff(list, COLOR_PAIR(monsters[num].src->colors[0]));
+  //mvwprintw(list, 2, 1, "DESC: %s", monsters[num].src->desc.c_str());
+  int offset = 0;
+  mvwprintw(list, offset + 2, 1, "SPEED: %d", monsters[num].speed);
+  mvwprintw(list, offset + 3, 1, "ABILITIES: %d", monsters[num].src->abilities);
+  mvwprintw(list, offset + 4, 1, "HP: %d", monsters[num].hp);
+  mvwprintw(list, offset + 5, 1, "DAMAGE: %s", monsters[num].src->damage.toString().c_str());
+  char vert[6] = "north";
+  char horz[5] = "east";
+  int v_dist = pc.row - monsters[num].row;
+  int h_dist = monsters[num].col - pc.col;
+  if(v_dist < 0) {
+    v_dist *= -1;
+    vert[0] = 's';
+    vert[2] = 'u';
+  }
+  if(h_dist < 0) {
+    h_dist *= -1;
+    horz[0] = 'w';
+    horz[1] = 'e';
+  }
+  mvwprintw(list, offset + 7, 1, "DISTANCE: %d (%d %s, %d %s)", max(abs(monsters[num].row - pc.row), abs(monsters[num].col - pc.col)), v_dist, vert, h_dist, horz);
+  wrefresh(list);
+  while(getch() != 27){
+    //wait until escape character
+  }
+  wclear(list);
+  wrefresh(list);
+  delwin(list);
+  print_map();
+  refresh();
+}
   
 
