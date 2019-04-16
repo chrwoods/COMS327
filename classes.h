@@ -151,9 +151,6 @@ class Lifeform {
   bool dead(){
     return hp <= 0;
   }
-
-  //from danger.h
-  void display_info();
 };
 
 class Monster {
@@ -338,6 +335,7 @@ class Dungeon {
   void kill_monster(int num);
   int move_monster(int num);
   void print_monster_list();
+  void display_monster_info(int num);
 
   //from drats.h
   void update_background();
