@@ -45,7 +45,7 @@ void Dungeon::teleport(){
   bool stored_fog = fog;
   fog = false;
   print_map();
-  char screen[HEIGHT][WIDTH];
+  int screen[HEIGHT][WIDTH];
   for(int i = 0; i < HEIGHT; i++){
     for(int j = 0; j < WIDTH; j++){
       screen[i][j] = mvinch(i, j); //save the screen
@@ -83,7 +83,9 @@ void Dungeon::teleport(){
 	continue;
       }
       update_status_text("");
-      mvaddch(dest.row, dest.col, screen[dest.row][dest.col]);
+      attron(screen[dest.row][dest.col] & A_COLOR);
+      mvaddch(dest.row, dest.col, screen[dest.row][dest.col] & A_CHARTEXT);
+      attroff(screen[dest.row][dest.col] & A_COLOR);
       dest.row += v_dir;
       dest.col += h_dir;
       mvaddch(dest.row, dest.col, '*');
@@ -98,6 +100,62 @@ void Dungeon::teleport(){
   fog = stored_fog;
   generate_paths(); //generate paths for new PC location
   if(!fog) update_fog();
+  print_map();
+}
+
+void Dungeon::look_at_monster(){
+  print_map();
+  int screen[HEIGHT][WIDTH];
+  for(int i = 0; i < HEIGHT; i++){
+    for(int j = 0; j < WIDTH; j++){
+      screen[i][j] = mvinch(i, j); //save the screen
+    }
+  }
+  Obj dest(pc.row, pc.col);
+  mvaddch(dest.row, dest.col, '*');
+  refresh();
+  while(1){
+    int key = getch();
+    int direction = 0;
+    if(key == 27) break;
+    else if(key == '1' || key == 'b') direction = 1;
+    else if(key == '2' || key == 'j') direction = 2;
+    else if(key == '3' || key == 'n') direction = 3;
+    else if(key == '4' || key == 'h') direction = 4;
+    else if(key == '6' || key == 'l') direction = 6;
+    else if(key == '7' || key == 'y') direction = 7;
+    else if(key == '8' || key == 'k') direction = 8;
+    else if(key == '9' || key == 'u') direction = 9;
+    if(key == 't'){
+      //look
+      if(fog && !visible[dest.row][dest.col]){
+	update_status_text("   You cannot look where you cannot see!");
+	continue;
+      }
+      bool looked = false;
+      for(int i = 0; i < monsters.size(); i++){
+	if(dest.row != monsters[i].row || dest.col != monsters[i].col) continue;
+	if(monsters[i].dead()) continue;
+	monsters[i].display_info();
+	looked = true;
+      }
+      if(!looked) update_status_text("   No monster found to look at.");
+    } else if(direction != 0){
+      update_status_text("");
+      int v_dir = 1 - ((direction - 1) / 3);
+      int h_dir = ((direction - 1) % 3) - 1;
+      if(dest.row + v_dir <= 0 || dest.row + v_dir >= HEIGHT - 1 || dest.col + h_dir <= 0 || dest.col + h_dir >= WIDTH - 1){
+	update_status_text("   You cannot teleport out of the map!");
+	continue;
+      }
+      attron(screen[dest.row][dest.col] & A_COLOR);
+      mvaddch(dest.row, dest.col, screen[dest.row][dest.col] & A_CHARTEXT);
+      attroff(screen[dest.row][dest.col] & A_COLOR);
+      dest.row += v_dir;
+      dest.col += h_dir;
+      mvaddch(dest.row, dest.col, '*');
+    }
+  }
   print_map();
 }
 
@@ -139,6 +197,7 @@ int Dungeon::pc_turn(){
     }
     else if(key == 'i') print_inventory();
     else if(key == 'e') print_equipment();
+    else if(key == 'L') look_at_monster();
     else if(key == 'q' || key == 'Q') return -1;
     if(direction > 0){
       if(move_pc(direction) == 0){
