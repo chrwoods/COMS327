@@ -33,13 +33,10 @@ void Dungeon::generate_item(){
 }
 
 void Dungeon::print_inventory(){
-  //test add
-  for(int i = 0; i < 10; i++) pc.equip[i] = items[i];
-  
-  WINDOW *list = newwin(22, 70, 1, 5);
+  WINDOW *list = newwin(22, 72, 1, 4);
   wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
   short inv_start = 1;
-  mvwprintw(list, 0, 28, "[ Inventory ]");
+  mvwprintw(list, 0, 29, "[ Inventory ]");
   for(int i = 0; i < 10; i++){
     mvwprintw(list, inv_start + i, 2, "%1d - (empty)", i);
     if(pc.carry[i].isNull()) continue; //inventory slot is empty
@@ -61,9 +58,6 @@ void Dungeon::print_inventory(){
 }
 
 void Dungeon::print_equipment(){
-  //test add
-  for(int i = 0; i < 5; i++) pc.equip[i] = items[i];
-  
   WINDOW *list = newwin(22, 78, 1, 1);
   short eq_start;
   short page = 0;
@@ -156,7 +150,7 @@ void Dungeon::pickup_items(){
   pages += found_items.size() % 3 ? 1 : 0;
   short page = 0;
   //open pickup menu
-  WINDOW *list = newwin(17, 58, 1, 11);
+  WINDOW *list = newwin(15, 58, 3, 11);
   while(1){
     wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
     short inv_start = 1;
@@ -173,7 +167,7 @@ void Dungeon::pickup_items(){
       mvwprintw(list, ++inv_start + i, 6, "TYPE: %s, HIT: %d, DAM: %s, DODGE: %d,", items[it_num].src->type.c_str(), items[it_num].hit, items[it_num].src->damage.toString().c_str(), items[it_num].dodge);
       mvwprintw(list, ++inv_start + i, 6, "DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", items[it_num].def, items[it_num].weight, items[it_num].speed, items[it_num].attr, items[it_num].value);
     }
-    if(pages > 0) mvwprintw(list, 16, 25, "[%2d/%-2d]", page + 1, pages);
+    if(pages > 1) mvwprintw(list, 14, 25, "[%2d/%-2d]", page + 1, pages);
     wrefresh(list);
     int ch = getch();
     while(ch == ERR) ch = getch();
@@ -181,6 +175,31 @@ void Dungeon::pickup_items(){
     if(ch == 27 || ch == 'q') break;
     else if(ch == KEY_UP && page > 0) page--;
     else if(ch == KEY_DOWN && page < pages - 1) page++;
+    else if(ch == '1' || ch == '2' || ch == '3'){
+      int inv_slot = -1;
+      for(int i = 0; i < 10; i++){
+	if(!pc.carry[i].isNull()) continue;
+	inv_slot = i;
+	break;
+      }
+      if(inv_slot < 0) {
+	update_status_text("   No open carry slots!");
+	break;
+      }
+      //insert item into inventory and remove from map
+      pc.carry[inv_slot] = items[found_items[ch - 49 + page * 3]];
+      items.erase(items.begin() + found_items[ch - 49 + page * 3]);
+      update_background();
+      //regenerate list of found items
+      found_items.clear();
+      for(int i = 0; i < items.size(); i++){
+	if(items[i].row != pc.row || items[i].col != pc.col) continue;
+	found_items.push_back(i);
+      }
+      if(found_items.size() <= 0) break;
+      pages = found_items.size() / 3 + found_items.size() % 3 ? 1 : 0;
+      if(page >= pages) page--;
+    }
   }
   wrefresh(list);
   delwin(list);
