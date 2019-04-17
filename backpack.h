@@ -208,20 +208,94 @@ void Dungeon::pickup_items(){
 }
 
 void Dungeon::wear_item(){
-  WINDOW *list = newwin(14, 40, 3, 20);
+  WINDOW *list = newwin(14, 50, 3, 15);
   wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
-  mvwprintw(list, 0, 14, "[ Inventory ]");
+  mvwprintw(list, 0, 19, "[ Wear Item ]");
   for(int i = 0; i < 10; i++){
     mvwprintw(list, i + 1, 2, "%1d - (empty)", i);
     if(pc.carry[i].isNull()) continue; //inventory slot is empty
     wattron(list, COLOR_PAIR(pc.carry[i].src->color));
     mvwaddch(list, i + 1, 6, pc.carry[i].src->symbol);
     wattroff(list, COLOR_PAIR(pc.carry[i].src->color));
-    mvwprintw(list, i + 1, 7, ", %s, TYPE: %s", pc.carry[i].src->name.c_str(), pc.carry[i].src->type.c_str());
+    mvwprintw(list, i + 1, 7, ", %s, %s", pc.carry[i].src->name.c_str(), pc.carry[i].src->type.c_str());
   }
   wrefresh(list);
-  while(getch() != 27){
-    //wait until escape character
+  int ch = getch();
+  while(ch != 27 && !(ch >= 48 && ch <= 57)) ch = getch();
+  if(ch != 27){
+    signed short eq_slot = -1;
+    short inv_slot = ch - 48;
+    if(pc.carry[inv_slot].isNull()){
+      update_status_text("   Given slot is empty!");
+      wclear(list);
+      wrefresh(list);
+      delwin(list);
+      print_map();
+      refresh();
+      return;
+    }
+    switch(pc.carry[inv_slot].src->symbol){
+    case '|':
+      eq_slot = 0;
+      break;
+    case ')':
+      eq_slot = 1;
+      break;
+    case '}':
+      eq_slot = 2;
+      break;
+    case '[':
+      eq_slot = 3;
+      break;
+    case ']':
+      eq_slot = 4;
+      break;
+    case '(':
+      eq_slot = 5;
+      break;
+    case '{':
+      eq_slot = 6;
+      break;
+    case '\\':
+      eq_slot = 7;
+      break;
+    case '\"':
+      eq_slot = 8;
+      break;
+    case '_':
+      eq_slot = 9;
+      break;
+    case '=':
+      eq_slot = 10;
+      break;
+    } 
+    if(eq_slot == 10){
+      mvwprintw(list, 12, 1, "Which ring slot? (l/r)");
+      wrefresh(list);
+      while(ch != 'l' && ch != 'r') ch = getch();
+      if(ch == 'r') eq_slot++;
+    } else if (eq_slot < 0){
+      update_status_text("   This item is unequippable.");
+      wclear(list);
+      wrefresh(list);
+      delwin(list);
+      print_map();
+      refresh();
+      return;
+    }
+    Collectible temp_item = pc.equip[eq_slot];
+    pc.equip[eq_slot] = pc.carry[inv_slot];
+    pc.carry[inv_slot] = temp_item;
+    string status_text = "   \'";
+    status_text.append(pc.equip[eq_slot].src->name);
+    status_text.append("\' was equipped");
+    if(!pc.carry[inv_slot].isNull()){
+      status_text.append(", swapping out \'");
+      status_text.append(pc.carry[inv_slot].src->name);
+      status_text.append("\'");
+    }
+    status_text.append(".");
+    update_status_text(status_text.c_str());
   }
   wclear(list);
   wrefresh(list);
