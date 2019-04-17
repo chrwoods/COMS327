@@ -102,6 +102,12 @@ class Dice {
     parse(str);
   }
 
+  Dice(const Dice& d){//copy constructor
+    base = d.base;
+    dice = d.dice;
+    sides = d.sides;
+  }
+
   void parse(string str){
     base = stoi(str.substr(0, str.find_first_of('+')));
     dice = stoi(str.substr(str.find_first_of('+') + 1, str.find_first_of('d') - str.find_first_of('+')));
@@ -200,7 +206,6 @@ class Collectible {
   Item *src; //construction source
   short int color;
   int hit;
-  Dice damage;
   int dodge;
   int def;
   int weight;
@@ -211,7 +216,32 @@ class Collectible {
   Collectible(){
     //do nothing
   }
+
+  Collectible(int num){
+    row = num;
+    col = num;
+  }
+
+  Collectible(const Collectible& c){ //copy constructor
+    row = c.row;
+    col = c.col;
+    src = c.src;
+    color = c.color;
+    hit = c.hit;
+    dodge = c.dodge;
+    def = c.def;
+    weight = c.weight;
+    speed = c.speed;
+    attr = c.attr;
+    value = c.value;
+  }
+
+  bool isNull(){
+    return row + col == 0;
+  }
 };
+
+const Collectible NULL_ITEM(0);
 
 class Item {
  public:
@@ -225,14 +255,14 @@ class Item {
   Dice def;
   Dice weight;
   Dice speed;
-  int attr;
+  Dice attr;
   Dice value;
   short int art; //0 if not artifact, 1 if artifact, >1 if placed
   uint8_t rarity;
   char symbol;
   
   Item(){
-    attr = 0;
+    //do nothing
   }
 
   Collectible create(){
@@ -240,12 +270,11 @@ class Item {
     c.src = this;
     c.color = color;
     c.hit = hit.roll();
-    c.damage = damage;
     c.dodge = dodge.roll(); //the ultimate evasive maneuver
     c.def = def.roll();
     c.weight = weight.roll();
     c.speed = speed.roll();
-    c.attr = attr;
+    c.attr = attr.roll();
     c.value = value.roll();
     return c;
   }
@@ -258,13 +287,16 @@ class Player {
   int hp;
   Dice damage;
   int speed;
-  Collectible *carry[10];
-  Collectible *equip[12];
+  //Collectible *carry[10];
+  //Collectible *equip[12];
+  Collectible carry[10];
+  Collectible equip[12];
 
+  
   Player(){
     for(int i = 0; i < 12; i++){
-      if(i < 10) carry[i] = 0;
-      equip[i] = 0;
+      if(i < 10) carry[i] = NULL_ITEM;
+      equip[i] = NULL_ITEM;
     }
   }
 };
