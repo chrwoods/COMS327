@@ -34,7 +34,7 @@ void Dungeon::generate_item(){
 
 void Dungeon::print_inventory(){
   //test add
-  for(int i = 0; i < 10; i++) pc.equip[i] = &(items[i]);
+  for(int i = 0; i < 10; i++) pc.equip[i] = items[i];
   
   WINDOW *list = newwin(22, 70, 1, 5);
   wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
@@ -42,12 +42,12 @@ void Dungeon::print_inventory(){
   mvwprintw(list, 0, 28, "[ Inventory ]");
   for(int i = 0; i < 10; i++){
     mvwprintw(list, inv_start + i, 2, "%1d - (empty)", i);
-    if(pc.carry[i] == 0) continue; //inventory slot is empty
-    wattron(list, COLOR_PAIR(pc.carry[i]->src->color));
-    mvwaddch(list, inv_start + i, 6, pc.carry[i]->src->symbol);
-    wattroff(list, COLOR_PAIR(pc.carry[i]->src->color));
-    mvwprintw(list, inv_start + i, 7, ", %s, TYPE: %s, HIT: %d, DAM: %s,", pc.carry[i]->src->name.c_str(), pc.carry[i]->src->type.c_str(), pc.carry[i]->hit, pc.carry[i]->src->damage.toString().c_str());
-    mvwprintw(list, ++inv_start + i, 6, "DODGE: %d, DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", pc.carry[i]->dodge, pc.carry[i]->def, pc.carry[i]->weight, pc.carry[i]->speed, pc.carry[i]->attr, pc.carry[i]->value);
+    if(pc.carry[i].isNull()) continue; //inventory slot is empty
+    wattron(list, COLOR_PAIR(pc.carry[i].src->color));
+    mvwaddch(list, inv_start + i, 6, pc.carry[i].src->symbol);
+    wattroff(list, COLOR_PAIR(pc.carry[i].src->color));
+    mvwprintw(list, inv_start + i, 7, ", %s, TYPE: %s, HIT: %d, DAM: %s,", pc.carry[i].src->name.c_str(), pc.carry[i].src->type.c_str(), pc.carry[i].hit, pc.carry[i].src->damage.toString().c_str());
+    mvwprintw(list, ++inv_start + i, 6, "DODGE: %d, DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", pc.carry[i].dodge, pc.carry[i].def, pc.carry[i].weight, pc.carry[i].speed, pc.carry[i].attr, pc.carry[i].value);
   }
   wrefresh(list);
   while(getch() != 27){
@@ -62,7 +62,8 @@ void Dungeon::print_inventory(){
 
 void Dungeon::print_equipment(){
   //test add
-  for(int i = 0; i < 5; i++) pc.equip[i] = &(items[i]);
+  for(int i = 0; i < 5; i++) pc.equip[i] = items[i];
+  
   WINDOW *list = newwin(22, 78, 1, 1);
   short eq_start;
   short page = 0;
@@ -111,13 +112,13 @@ void Dungeon::print_equipment(){
 	type = "Underwear?"; //this should never happen
       }
       mvwprintw(list, ++eq_start + i - page * 6, 2, "%s (%c) - (empty)", type, i + 97);
-      if(pc.equip[i] == 0) continue; //inventory slot is empty
+      if(pc.equip[i].isNull()) continue; //inventory slot is empty
       short desc_pos = strlen(type) + 9;
-      wattron(list, COLOR_PAIR(pc.equip[i]->src->color));
-      mvwaddch(list, eq_start + i - page * 6, desc_pos, pc.equip[i]->src->symbol);
-      wattroff(list, COLOR_PAIR(pc.equip[i]->src->color));
-      mvwprintw(list, eq_start + i - page * 6, desc_pos + 1, ", %s, HIT: %d, DAM: %s,", pc.equip[i]->src->name.c_str(), pc.equip[i]->hit, pc.equip[i]->src->damage.toString().c_str());
-      mvwprintw(list, ++eq_start + i - page * 6, 5, "DODGE: %d, DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", pc.equip[i]->dodge, pc.equip[i]->def, pc.equip[i]->weight, pc.equip[i]->speed, pc.equip[i]->attr, pc.equip[i]->value);
+      wattron(list, COLOR_PAIR(pc.equip[i].src->color));
+      mvwaddch(list, eq_start + i - page * 6, desc_pos, pc.equip[i].src->symbol);
+      wattroff(list, COLOR_PAIR(pc.equip[i].src->color));
+      mvwprintw(list, eq_start + i - page * 6, desc_pos + 1, ", %s, HIT: %d, DAM: %s,", pc.equip[i].src->name.c_str(), pc.equip[i].hit, pc.equip[i].src->damage.toString().c_str());
+      mvwprintw(list, ++eq_start + i - page * 6, 5, "DODGE: %d, DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", pc.equip[i].dodge, pc.equip[i].def, pc.equip[i].weight, pc.equip[i].speed, pc.equip[i].attr, pc.equip[i].value);
     }
     mvwprintw(list, 21, 35, "[ %d/2 ]", page + 1);
     wrefresh(list);
@@ -151,25 +152,36 @@ void Dungeon::pickup_items(){
     update_status_text("   No items were found to pick up.");
     return;
   }
+  short pages = found_items.size() / 3;
+  pages += found_items.size() % 3 ? 1 : 0;
+  short page = 0;
   //open pickup menu
-  WINDOW *list = newwin(16, 58, 1, 11);
-  wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
-  short inv_start = 1;
-  mvwprintw(list, 0, 21, "[ Pickup Menu ]");
-  for(int i = 0; i < found_items.size(); i++){
-    int it_num = found_items[i];
-    if(items[it_num].row != pc.row || items[it_num].col != pc.col) continue;
-    mvwprintw(list, ++inv_start + i, 2, "%1d - ", i);
-    wattron(list, COLOR_PAIR(items[it_num].src->color));
-    mvwaddch(list, inv_start + i, 6, items[it_num].src->symbol);
-    wattroff(list, COLOR_PAIR(items[it_num].src->color));
-    mvwprintw(list, inv_start + i, 7, ", %s", items[it_num].src->name.c_str());
-    mvwprintw(list, ++inv_start + i, 6, "TYPE: %s, HIT: %d, DAM: %s, DODGE: %d,", items[it_num].src->type.c_str(), items[it_num].hit, items[it_num].src->damage.toString().c_str(), items[it_num].dodge);
-    mvwprintw(list, ++inv_start + i, 6, "DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", items[it_num].def, items[it_num].weight, items[it_num].speed, items[it_num].attr, items[it_num].value);
+  WINDOW *list = newwin(17, 58, 1, 11);
+  while(1){
+    wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
+    short inv_start = 1;
+    mvwprintw(list, 0, 21, "[ Pickup Menu ]");
+    for(int i = 0; i < 3; i++){
+      if(i + page * 3 >= found_items.size()) break;
+      int it_num = found_items[i + page * 3];
+      if(items[it_num].row != pc.row || items[it_num].col != pc.col) continue;
+      mvwprintw(list, ++inv_start + i, 2, "%1d - ", i + 1);
+      wattron(list, COLOR_PAIR(items[it_num].src->color));
+      mvwaddch(list, inv_start + i, 6, items[it_num].src->symbol);
+      wattroff(list, COLOR_PAIR(items[it_num].src->color));
+      mvwprintw(list, inv_start + i, 7, ", %s", items[it_num].src->name.c_str());
+      mvwprintw(list, ++inv_start + i, 6, "TYPE: %s, HIT: %d, DAM: %s, DODGE: %d,", items[it_num].src->type.c_str(), items[it_num].hit, items[it_num].src->damage.toString().c_str(), items[it_num].dodge);
+      mvwprintw(list, ++inv_start + i, 6, "DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", items[it_num].def, items[it_num].weight, items[it_num].speed, items[it_num].attr, items[it_num].value);
+    }
+    if(pages > 0) mvwprintw(list, 16, 25, "[%2d/%-2d]", page + 1, pages);
+    wrefresh(list);
+    int ch = getch();
+    while(ch == ERR) ch = getch();
+    wclear(list);
+    if(ch == 27 || ch == 'q') break;
+    else if(ch == KEY_UP && page > 0) page--;
+    else if(ch == KEY_DOWN && page < pages - 1) page++;
   }
-  wrefresh(list);
-  while(getch() != 27){}
-  wclear(list);
   wrefresh(list);
   delwin(list);
   print_map();
