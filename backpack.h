@@ -152,19 +152,20 @@ void Dungeon::pickup_items(){
     return;
   }
   //open pickup menu
-  WINDOW *list = newwin(22, 70, 1, 5);
+  WINDOW *list = newwin(16, 58, 1, 11);
   wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
   short inv_start = 1;
-  mvwprintw(list, 0, 27, "[ Pickup Menu ]");
+  mvwprintw(list, 0, 21, "[ Pickup Menu ]");
   for(int i = 0; i < found_items.size(); i++){
     int it_num = found_items[i];
     if(items[it_num].row != pc.row || items[it_num].col != pc.col) continue;
-    mvwprintw(list, inv_start + i, 2, "%1d - (empty)", i);
+    mvwprintw(list, ++inv_start + i, 2, "%1d - ", i);
     wattron(list, COLOR_PAIR(items[it_num].src->color));
     mvwaddch(list, inv_start + i, 6, items[it_num].src->symbol);
     wattroff(list, COLOR_PAIR(items[it_num].src->color));
-    mvwprintw(list, inv_start + i, 7, ", %s, TYPE: %s, HIT: %d, DAM: %s,", items[it_num].src->name.c_str(), items[it_num].src->type.c_str(), items[it_num].hit, items[it_num].src->damage.toString().c_str());
-    mvwprintw(list, ++inv_start + i, 6, "DODGE: %d, DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", items[it_num].dodge, items[it_num].def, items[it_num].weight, items[it_num].speed, items[it_num].attr, items[it_num].value);
+    mvwprintw(list, inv_start + i, 7, ", %s", items[it_num].src->name.c_str());
+    mvwprintw(list, ++inv_start + i, 6, "TYPE: %s, HIT: %d, DAM: %s, DODGE: %d,", items[it_num].src->type.c_str(), items[it_num].hit, items[it_num].src->damage.toString().c_str(), items[it_num].dodge);
+    mvwprintw(list, ++inv_start + i, 6, "DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", items[it_num].def, items[it_num].weight, items[it_num].speed, items[it_num].attr, items[it_num].value);
   }
   wrefresh(list);
   while(getch() != 27){}
