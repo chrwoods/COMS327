@@ -206,3 +206,27 @@ void Dungeon::pickup_items(){
   print_map();
   refresh();
 }
+
+void Dungeon::wear_item(){
+  WINDOW *list = newwin(14, 40, 3, 20);
+  wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
+  mvwprintw(list, 0, 14, "[ Inventory ]");
+  for(int i = 0; i < 10; i++){
+    mvwprintw(list, i + 1, 2, "%1d - (empty)", i);
+    if(pc.carry[i].isNull()) continue; //inventory slot is empty
+    wattron(list, COLOR_PAIR(pc.carry[i].src->color));
+    mvwaddch(list, i + 1, 6, pc.carry[i].src->symbol);
+    wattroff(list, COLOR_PAIR(pc.carry[i].src->color));
+    mvwprintw(list, i + 1, 7, ", %s, TYPE: %s", pc.carry[i].src->name.c_str(), pc.carry[i].src->type.c_str());
+  }
+  wrefresh(list);
+  while(getch() != 27){
+    //wait until escape character
+  }
+  wclear(list);
+  wrefresh(list);
+  delwin(list);
+  print_map();
+  refresh();
+}
+  
