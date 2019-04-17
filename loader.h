@@ -348,7 +348,7 @@ int Dungeon::load_item(ifstream *fp){
       complete = complete | 0x200;
     } else if(header.compare("ATTR") == 0){
       if((complete & 0x400) == 0x400) return -1; //field already filled
-      item.rarity = stoi(line.substr(line.find_first_of(' ') + 1));
+      item.attr.parse(line.substr(line.find_first_of(' ') + 1));
       complete = complete | 0x400;
     } else if(header.compare("VAL") == 0){
       if((complete & 0x800) == 0x800) return -1; //field already filled
@@ -432,7 +432,7 @@ void Dungeon::print_item(int num){
   //print speed
   cout << "Speed Bonus: " << item_templates[num].speed.toString() << endl;
   //print attr
-  cout << "Special Attribute: " << std::to_string(item_templates[num].attr) << endl;
+  cout << "Special Attribute: " << item_templates[num].attr.toString() << endl;
   //print val
   cout << "Value: " << item_templates[num].value.toString() << endl;
   //print art (not the felony)
