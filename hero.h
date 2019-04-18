@@ -11,6 +11,7 @@ int Dungeon::move_pc(int direction){
     if(monsters[i].row == row && monsters[i].col == col && !monsters[i].dead()){
       if(fight(i, true)){
 	mvaddch(row, col, background[row][col]); //monster is dead, remove from map
+	if(monsters[i].src->boss()) return 2; //ding dong, the boss is dead!
       }
       attroff(COLOR_PAIR(WHITE_PAIR));
       refresh();
@@ -223,9 +224,10 @@ int Dungeon::pc_turn(){
     else if(key == 'I') inspect_item();
     else if(key == 'q' || key == 'Q') return -1;
     if(direction > 0){
-      if(move_pc(direction) == 0){
+      int move_return = move_pc(direction);
+      if(move_return >= 0){
 	//update_status_text("");
-	return 0;
+	return move_return;
       } else update_status_text("   You cannot move inside a wall.");
     }
   }
