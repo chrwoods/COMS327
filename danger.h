@@ -138,7 +138,7 @@ int Dungeon::move_monster(int num){
     attron(COLOR_PAIR(WHITE_PAIR));
     mvaddch(row, col, background[row][col]); //reset where monster was
     attroff(COLOR_PAIR(WHITE_PAIR));
-  }else{
+  } else {
     attron(COLOR_PAIR(GRAY_PAIR));
     mvaddch(row, col, memory[row][col]);
     attroff(COLOR_PAIR(GRAY_PAIR));
@@ -151,24 +151,94 @@ int Dungeon::move_monster(int num){
     update_background(); //update background because of new possible corridor
   }
   if(monsters[num].src->pass() || map[row - 1 + destination / 3][col - 1 + destination % 3] == 0){
-    monsters[num].row += (destination / 3) - 1;
-    monsters[num].col += (destination % 3) - 1;
-    row = monsters[num].row;
-    col = monsters[num].col;
+    row = monsters[num].row + (destination / 3) - 1;
+    col = monsters[num].col + (destination % 3) - 1;
+
     //check combat
-    if(row == pc.row && col == pc.col) return 1; //the player has been killed
+    if(pc.row == row && pc.col == col){
+      if(fight(num, false)){
+	attron(COLOR_PAIR(monsters[num].src->colors[0]));
+	mvaddch(row, col, monsters[num].src->symbol); //add monster at pc's spot
+	attroff(COLOR_PAIR(monsters[num].src->colors[0]));
+	return 1; //player has been slain
+      }
+      destination = 4;
+      row = monsters[num].row;
+      col = monsters[num].col;
+    }
+    
+    //place on map again
+    if(!fog || visible[row][col]) {
+      attron(COLOR_PAIR(monsters[num].src->colors[0])); //for now we will only print the first color (TODO)
+      mvaddch(row, col, monsters[num].src->symbol); //add monster at new spot
+      attroff(COLOR_PAIR(monsters[num].src->colors[0]));
+    }
+    monsters[num].row = row;
+    monsters[num].col = col;
+    if(destination == 4) {
+      refresh();
+      return 0;
+    }
+    
+    //check for monsters to displace
     for(int i = 0; i < monsters.size(); i++){
-      if(num == i) continue; //suicide is not the answer, monsters can only slay others
+      if(num == i) continue; //according to Newton, monsters can't logistically push themselves out of the way
       if(monsters[i].row == row && monsters[i].col == col){
-	kill_monster(i); //FATALITY
+	//displace the monster
+	int v_dir = destination / 3 - 1;
+	int h_dir = destination % 3 - 1;
+	bool displaced = false;
+	int v;
+	int h;
+	if(v_dir * h_dir != 0){ //monster moved diagonally
+	  for(int j = 0; j < 5; j++){
+	    v = v_dir - (v_dir * ((j + 1) % 2) * (j / 2)); //math magic
+	    h = h_dir - (v_dir * ((j + 1) / 2) * (j % 2));
+	    if(background[row + v][col + h] == A_CHARTEXT & mvinch(row + v, col + h)){ //this checks if the background is equal to the
+	      displaced = true;
+	      break;
+	    }
+	  }
+	} else if(v_dir == 0) { //horizontal move
+	  for(int j = 1; j >= 0; j--){
+	    for(int k = 0; k <= 2; k++){
+	      v = k;
+	      if(k == 2) v = -1;
+	      h = h_dir * j;
+	      if(background[row + v][col + h] == A_CHARTEXT & mvinch(row + v, col + h)){
+	        displaced = true;
+		break;
+	      }
+	    }
+	  }
+	} else { //vertical move
+	  for(int j = 1; j >= 0; j--){
+	    for(int k = 0; k <= 2; k++){
+	      h = k;
+	      if(k == 2) h = -1;
+	      v = h_dir * j;
+	      if(background[row + v][col + h] == A_CHARTEXT & mvinch(row + v, col + h)){
+		displaced = true;
+		break;
+	      }
+	    }
+	  }
+	}
+	if(!displaced){
+	  destination = 8 - destination; //invert destination (swap)
+	  v = (destination / 3) - 1;
+	  h = (destination % 3) - 1;
+	}
+	//move monster
+	monsters[i].row += v;
+	monsters[i].col += h;
+	attron(COLOR_PAIR(monsters[i].src->colors[0]));
+	mvaddch(row + v, col + h, monsters[i].src->symbol);
+	attroff(COLOR_PAIR(monsters[i].src->colors[0]));
       }
     }
   }
-  if(!fog || visible[row][col]) {
-    attron(COLOR_PAIR(monsters[num].src->colors[0])); //for now we will only print the first color (TODO)
-    mvaddch(row, col, monsters[num].src->symbol); //add monster at new spot
-    attroff(COLOR_PAIR(monsters[num].src->colors[0]));
-  }
+  
   //destroy checking
   if(monsters[num].src->destroy()){
     char bg = background[row][col];
@@ -355,5 +425,30 @@ void Dungeon::display_monster_info(int num){
   print_map();
   refresh();
 }
-  
 
+bool Dungeon::fight(int num, bool player_attacking){ //return true if defending dies
+  if(player_attacking){
+    uint16_t damage = pc.damage.roll();
+    //if there's a weapon equipped, use that instead of punching
+    if(!pc.equip[0].isNull()) damage = pc.equip[0].src->damage.roll();
+    for(int i = 1; i < 12; i++){
+      if(pc.equip[i].isNull()) continue;
+      damage += pc.equip[i].src->damage.roll();
+    }
+    monsters[num].hp -= damage;
+    if(monsters[num].hp <= 0) return true;
+    return false;
+  } else {
+    int damage = monsters[num].src->damage.roll();
+    pc.hp -= damage;
+    string status_text = "   A \'";
+    status_text.append(monsters[num].src->name);
+    status_text.append("\' hits you for ");
+    status_text.append(to_string(damage));
+    status_text.append(" damage. Current HP: ");
+    status_text.append(to_string(pc.hp));
+    update_status_text(status_text.c_str());
+    if(pc.hp <= 0) return true;
+    return false;
+  }
+}
