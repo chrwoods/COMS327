@@ -154,7 +154,7 @@ void Dungeon::pickup_items(){
   while(1){
     wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
     short inv_start = 1;
-    mvwprintw(list, 0, 18, "[ Pickup Menu ]");
+    mvwprintw(list, 0, 24, "[ Pickup Menu ]");
     for(int i = 0; i < 3; i++){
       if(i + page * 3 >= found_items.size()) break;
       int it_num = found_items[i + page * 3];
@@ -167,7 +167,7 @@ void Dungeon::pickup_items(){
       mvwprintw(list, ++inv_start + i, 6, "TYPE: %s, HIT: %d, DAM: %s, DODGE: %d,", items[it_num].src->type.c_str(), items[it_num].hit, items[it_num].src->damage.toString().c_str(), items[it_num].dodge);
       mvwprintw(list, ++inv_start + i, 6, "DEF: %d, WEIGHT: %d, SPEED: %d, ATTR: %d, VAL: %d", items[it_num].def, items[it_num].weight, items[it_num].speed, items[it_num].attr, items[it_num].value);
     }
-    if(pages > 1) mvwprintw(list, 14, 22, "[%2d/%-2d]", page + 1, pages);
+    if(pages > 1) mvwprintw(list, 14, 28, "[%2d/%-2d]", page + 1, pages);
     wrefresh(list);
     int ch = getch();
     while(ch == ERR) ch = getch();
@@ -200,7 +200,7 @@ void Dungeon::pickup_items(){
 	found_items.push_back(i);
       }
       if(found_items.size() <= 0) break;
-      pages = found_items.size() / 3 + found_items.size() % 3 ? 1 : 0;
+      pages = found_items.size() / 3 + (found_items.size() % 3 ? 1 : 0);
       if(page >= pages) page--;
     }
   }
