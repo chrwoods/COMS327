@@ -202,6 +202,8 @@ int Dungeon::pc_turn(){
     else if(key == ',') pickup_items();
     else if(key == 'w') wear_item();
     else if(key == 't') takeoff_item();
+    else if(key == 'd') drop_item();
+    else if(key == 'x') destroy_item();
     else if(key == 'q' || key == 'Q') return -1;
     if(direction > 0){
       if(move_pc(direction) == 0){

@@ -33,10 +33,10 @@ void Dungeon::generate_item(){
 }
 
 void Dungeon::print_inventory(){
-  WINDOW *list = newwin(22, 72, 1, 4);
+  WINDOW *list = newwin(22, 74, 1, 3);
   wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
   short inv_start = 1;
-  mvwprintw(list, 0, 29, "[ Inventory ]");
+  mvwprintw(list, 0, 30, "[ Inventory ]");
   for(int i = 0; i < 10; i++){
     mvwprintw(list, inv_start + i, 2, "%1d - (empty)", i);
     if(pc.carry[i].isNull()) continue; //inventory slot is empty
@@ -185,6 +185,9 @@ void Dungeon::pickup_items(){
       if(inv_slot < 0) {
 	update_status_text("   No open carry slots!");
 	break;
+      }
+      if(ch - 49 + page * 3 >= found_items.size()){
+	continue;
       }
       //insert item into inventory and remove from map
       pc.carry[inv_slot] = items[found_items[ch - 49 + page * 3]];
@@ -348,13 +351,13 @@ void Dungeon::takeoff_item(){
     default:
       type = "Underwear?"; //this should never happen
     }
-    mvwprintw(list, i + 1, 1, "%s (%c) - (empty)", type, i + 97);
+    mvwprintw(list, i + 2, 1, "%s (%c) - (empty)", type, i + 97);
     if(pc.equip[i].isNull()) continue; //inventory slot is empty
     short desc_pos = strlen(type) + 8;
     wattron(list, COLOR_PAIR(pc.equip[i].src->color));
-    mvwaddch(list, i + 1, desc_pos, pc.equip[i].src->symbol);
+    mvwaddch(list, i + 2, desc_pos, pc.equip[i].src->symbol);
     wattroff(list, COLOR_PAIR(pc.equip[i].src->color));
-    mvwprintw(list, i + 1, desc_pos + 1, ", %s", pc.equip[i].src->name.c_str());
+    mvwprintw(list, i + 2, desc_pos + 1, ", %s", pc.equip[i].src->name.c_str());
   }
   wrefresh(list);
   int ch = getch();
@@ -402,3 +405,95 @@ void Dungeon::takeoff_item(){
   print_map();
   refresh();
 } 
+
+void Dungeon::drop_item(){
+  WINDOW *list = newwin(12, 50, 3, 15);
+  wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
+  mvwprintw(list, 0, 19, "[ Drop Item ]");
+  for(int i = 0; i < 10; i++){
+    mvwprintw(list, i + 1, 2, "%1d - (empty)", i);
+    if(pc.carry[i].isNull()) continue; //inventory slot is empty
+    wattron(list, COLOR_PAIR(pc.carry[i].src->color));
+    mvwaddch(list, i + 1, 6, pc.carry[i].src->symbol);
+    wattroff(list, COLOR_PAIR(pc.carry[i].src->color));
+    mvwprintw(list, i + 1, 7, ", %s, %s", pc.carry[i].src->name.c_str(), pc.carry[i].src->type.c_str());
+  }
+  wrefresh(list);
+  int ch = getch();
+  while(ch != 27 && !(ch >= 48 && ch <= 57)) ch = getch();
+  if(ch != 27){
+    short inv_slot = ch - 48;
+    if(pc.carry[inv_slot].isNull()){
+      update_status_text("   Given slot is empty!");
+      wclear(list);
+      wrefresh(list);
+      delwin(list);
+      print_map();
+      refresh();
+      return;
+    }
+    Collectible temp_item = pc.carry[inv_slot];
+    pc.carry[inv_slot] = NULL_ITEM;
+    temp_item.row = pc.row;
+    temp_item.col = pc.col;
+    items.push_back(temp_item);
+    update_background();
+    string status_text = "   \'";
+    status_text.append(temp_item.src->name);
+    status_text.append("\' was dropped.");
+    update_status_text(status_text.c_str());
+  }
+  wclear(list);
+  wrefresh(list);
+  delwin(list);
+  print_map();
+  refresh();
+}
+
+void Dungeon::destroy_item(){
+  WINDOW *list = newwin(12, 50, 3, 15);
+  wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
+  mvwprintw(list, 0, 16, "[ Destroy Item ]");
+  for(int i = 0; i < 10; i++){
+    mvwprintw(list, i + 1, 2, "%1d - (empty)", i);
+    if(pc.carry[i].isNull()) continue; //inventory slot is empty
+    wattron(list, COLOR_PAIR(pc.carry[i].src->color));
+    mvwaddch(list, i + 1, 6, pc.carry[i].src->symbol);
+    wattroff(list, COLOR_PAIR(pc.carry[i].src->color));
+    mvwprintw(list, i + 1, 7, ", %s, %s", pc.carry[i].src->name.c_str(), pc.carry[i].src->type.c_str());
+  }
+  wrefresh(list);
+  int ch = getch();
+  while(ch != 27 && !(ch >= 48 && ch <= 57)) ch = getch();
+  if(ch != 27){
+    short inv_slot = ch - 48;
+    if(pc.carry[inv_slot].isNull()){
+      update_status_text("   Given slot is empty!");
+      wclear(list);
+      wrefresh(list);
+      delwin(list);
+      print_map();
+      refresh();
+      return;
+    }
+    string temp_name = pc.carry[inv_slot].src->name;
+    pc.carry[inv_slot] = NULL_ITEM;
+    if(temp_name.compare("the One Ring") == 0){
+      update_status_text("   The One Ring has been dropped into Mount Doom!");
+    } else if(temp_name.compare("Mjolnir") == 0){
+      update_status_text("   Mjolnir has been shattered!");
+    } else if(temp_name.compare("the Heart of the Ocean") == 0){
+      update_status_text("   The Heart of the Ocean has been returned to the sea!");
+    } else {
+      string status_text = "   \'";
+      status_text.append(temp_name);
+      status_text.append("\' was destroyed!");
+      update_status_text(status_text.c_str());
+    }
+  }
+  wclear(list);
+  wrefresh(list);
+  delwin(list);
+  print_map();
+  refresh();
+}
