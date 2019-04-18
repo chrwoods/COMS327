@@ -18,7 +18,8 @@ using namespace std;
 #define MIN_ROOM_WIDTH 4
 #define MIN_ROOM_HEIGHT 3 
 #define DEFAULT_MONSTERS 10
-#define PC_SPEED 10
+#define DEFAULT_PC_SPEED 10
+#define DEFAULT_PC_HP 1000
 #define MON_SMART 1
 #define MON_TELEPATHIC 2
 #define MON_TUNNEL 4
@@ -117,7 +118,7 @@ class Dice {
   int roll(){
     int val = base;
     for(int i = 0; i < dice; i++){
-      base += 1 + rand() % sides;
+      val += 1 + rand() % sides;
     }
     return val;
   }
@@ -291,14 +292,19 @@ class Player {
   //Collectible *equip[12];
   Collectible carry[10];
   Collectible equip[12];
-
   
   Player(){
     for(int i = 0; i < 12; i++){
       if(i < 10) carry[i] = NULL_ITEM;
       equip[i] = NULL_ITEM;
     }
+    hp = DEFAULT_PC_HP;
+    speed = DEFAULT_PC_SPEED;
+    damage.parse("0+1d4");
   }
+
+  //from hero.h
+  int calcSpeed();
 };
 
 class Dungeon {
@@ -368,7 +374,8 @@ class Dungeon {
   int move_monster(int num);
   void print_monster_list();
   void display_monster_info(int num);
-
+  bool fight(int num, bool player_attacking);
+  
   //from drats.h
   void update_background();
   void update_fog();
