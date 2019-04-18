@@ -8,7 +8,7 @@
 #include "ascii.h"
 #include "hero.h"
 #include "loader.h"
-#include "itemize.h"
+#include "backpack.h"
 
 int main(int argc, char *argv[]){
   Dungeon rlg;
@@ -101,11 +101,11 @@ int main(int argc, char *argv[]){
   drats();
   rlg.update_background();
   rlg.print_map();
-  //move until the player is dead, probably (or the PC can win)
+  //move until the player or the boss is dead
   int gamestate = 0;
   PQueue q(sizeof(int));
   int negative1 = -1; //don't laugh at this line please
-  q.add(&negative1, floor(1000/PC_SPEED));
+  q.add(&negative1, floor(1000/rlg.pc.calcSpeed()));
   for(int i = 0; i < rlg.monsters.size(); i++){
     int speed = (rlg.monsters[i].speed);
     q.add(&i, floor(1000/speed));
@@ -114,37 +114,17 @@ int main(int argc, char *argv[]){
     int num;
     int turn;
     q.pop(&num, &turn);
-    if(num >= 0){
+    if(num < 0){ //move player
+      gamestate = rlg.pc_turn();
+      q.add(&num, turn + 1000/rlg.pc.calcSpeed());
+    } else { //move monster
       if(rlg.monsters[num].dead()) continue; //dead monster, do not add back to queue
-    }
-    if(num < 0){
-      if(rlg.pc_turn() < 0){
-	gamestate = -1; //aborted
-	break;
-      }
-    }
-    else gamestate = rlg.move_monster(num);
-    if(gamestate == 1){ 
-      rlg.print_map();
-      usleep(1000000); //let the player see that they have failed this city
-      break;
-    }
-    if(num < 0){
-      gamestate = 2;
-      for(int i = 0; i < rlg.monsters.size(); i++){
-	if(!rlg.monsters[i].dead()){
-	  gamestate = 0;
-	  break;
-	}
-      }
-      if(gamestate == 2){
-	usleep(1000000); //let the player bask in their own glory
-	break;
-      }
-      q.add(&num, turn + 1000/PC_SPEED);
-    } else {
+      gamestate = rlg.move_monster(num);
       q.add(&num, turn + 1000/(rlg.monsters[num].speed));
     }
+  }
+  if(gamestate > 0){
+    usleep(1000000); //let player see final map state
   }
   stard();
   q.empty();
