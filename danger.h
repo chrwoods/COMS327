@@ -256,18 +256,80 @@ void Dungeon::print_monster_list(){
     
 void Dungeon::display_monster_info(int num){
   if(num < 0 || num >= monsters.size()) return;
-  WINDOW *list = newwin(15, 40, 4, 20);
+  WINDOW *list = newwin(17, 80, 2, 0);
   wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
   mvwprintw(list, 1, 1, "x - %s", monsters[num].src->name.c_str());
   wattron(list, COLOR_PAIR(monsters[num].src->colors[0]));
   mvwaddch(list, 1, 1, monsters[num].src->symbol);
   wattroff(list, COLOR_PAIR(monsters[num].src->colors[0]));
-  //mvwprintw(list, 2, 1, "DESC: %s", monsters[num].src->desc.c_str());
-  int offset = 0;
-  mvwprintw(list, offset + 2, 1, "SPEED: %d", monsters[num].speed);
-  mvwprintw(list, offset + 3, 1, "ABILITIES: %d", monsters[num].src->abilities);
-  mvwprintw(list, offset + 4, 1, "HP: %d", monsters[num].hp);
-  mvwprintw(list, offset + 5, 1, "DAMAGE: %s", monsters[num].src->damage.toString().c_str());
+  string desc = monsters[num].src->desc;
+  short offset = 0;
+  while(desc.length() > 1){
+    string desc_line = desc.substr(0, desc.find_first_of("\n"));
+    mvwprintw(list, 2 + ++offset, 1, desc_line.c_str());
+    desc = desc.substr(desc.find_first_of("\n") + 1);
+  }
+  string abil_header = "Ability: ";
+  string abils = "";
+  if(monster_templates[num].smart()) abils.append("Smart");
+  if(monster_templates[num].telepathic()){
+    if(abils.length() > 0){
+      abils.append(", ");
+      if(abil_header.compare("Ability: ") == 0) abil_header = "Abilities: ";
+    }
+    abils.append("Telepathic");
+  }
+  if(monster_templates[num].tunnel()){
+    if(abils.length() > 0){
+      abils.append(", ");
+      if(abil_header.compare("Ability: ") == 0) abil_header = "Abilities: ";
+    }
+    abils.append("Tunnel");
+  }
+  if(monster_templates[num].erratic()){
+    if(abils.length() > 0){
+      abils.append(", ");
+      if(abil_header.compare("Ability: ") == 0) abil_header = "Abilities: ";
+    }
+    abils.append("Erratic");
+  }
+  if(monster_templates[num].pass()){
+    if(abils.length() > 0){
+      abils.append(", ");
+      if(abil_header.compare("Ability: ") == 0) abil_header = "Abilities: ";
+    }
+    abils.append("Pass");
+  }
+  if(monster_templates[num].pickup()){
+    if(abils.length() > 0){
+      abils.append(", ");
+      if(abil_header.compare("Ability: ") == 0) abil_header = "Abilities: ";
+    }
+    abils.append("Pickup");
+  }
+  if(monster_templates[num].destroy()){
+    if(abils.length() > 0){
+      abils.append(", ");
+      if(abil_header.compare("Ability: ") == 0) abil_header = "Abilities: ";
+    }
+    abils.append("Destroy");
+  }
+  if(monster_templates[num].unique()){
+    if(abils.length() > 0){
+      abils.append(", ");
+      if(abil_header.compare("Ability: ") == 0) abil_header = "Abilities: ";
+    }
+    abils.append("Unique");
+  }
+  if(monster_templates[num].boss()){
+    if(abils.length() > 0){
+      abils.append(", ");
+      if(abil_header.compare("Ability: ") == 0) abil_header = "Abilities: ";
+    }
+    abils.append("Boss");
+  }
+  mvwprintw(list, offset + 4, 1, "%s%s", abil_header.c_str(), abils.c_str());
+  mvwprintw(list, offset + 5, 1, "HP: %d, Damage: %s, Speed: %d", monsters[num].hp, monsters[num].src->damage.toString().c_str(), monsters[num].speed);
   char vert[6] = "north";
   char horz[5] = "east";
   int v_dist = pc.row - monsters[num].row;
@@ -282,7 +344,7 @@ void Dungeon::display_monster_info(int num){
     horz[0] = 'w';
     horz[1] = 'e';
   }
-  mvwprintw(list, offset + 7, 1, "DISTANCE: %d (%d %s, %d %s)", max(abs(monsters[num].row - pc.row), abs(monsters[num].col - pc.col)), v_dist, vert, h_dist, horz);
+  mvwprintw(list, offset + 7, 1, "Distance: %d (%d %s, %d %s)", max(abs(monsters[num].row - pc.row), abs(monsters[num].col - pc.col)), v_dist, vert, h_dist, horz);
   wrefresh(list);
   while(getch() != 27){
     //wait until escape character
