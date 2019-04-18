@@ -194,7 +194,8 @@ int Dungeon::move_monster(int num){
 	  for(int j = 0; j < 5; j++){
 	    v = v_dir - (v_dir * ((j + 1) % 2) * (j / 2)); //math magic
 	    h = h_dir - (v_dir * ((j + 1) / 2) * (j % 2));
-	    if(background[row + v][col + h] == A_CHARTEXT & mvinch(row + v, col + h)){ //this checks if the background is equal to the
+	    if(row + v <= 0 || row + v >= HEIGHT - 1 || col + h <= 0 || col + h >= WIDTH - 1) continue; //cannot push out of bounds
+	    if(background[row + v][col + h] == (A_CHARTEXT & mvinch(row + v, col + h))){ //this checks if the background is equal to the
 	      displaced = true;
 	      break;
 	    }
@@ -205,7 +206,8 @@ int Dungeon::move_monster(int num){
 	      v = k;
 	      if(k == 2) v = -1;
 	      h = h_dir * j;
-	      if(background[row + v][col + h] == A_CHARTEXT & mvinch(row + v, col + h)){
+	      if(row + v <= 0 || row + v >= HEIGHT - 1 || col + h <= 0 || col + h >= WIDTH - 1) continue; //cannot push out of bounds
+	      if(background[row + v][col + h] == (A_CHARTEXT & mvinch(row + v, col + h))){
 	        displaced = true;
 		break;
 	      }
@@ -217,7 +219,8 @@ int Dungeon::move_monster(int num){
 	      h = k;
 	      if(k == 2) h = -1;
 	      v = h_dir * j;
-	      if(background[row + v][col + h] == A_CHARTEXT & mvinch(row + v, col + h)){
+	      if(row + v <= 0 || row + v >= HEIGHT - 1 || col + h <= 0 || col + h >= WIDTH - 1) continue; //cannot push out of bounds
+	      if(background[row + v][col + h] == (A_CHARTEXT & mvinch(row + v, col + h))){
 		displaced = true;
 		break;
 	      }
