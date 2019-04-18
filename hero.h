@@ -6,18 +6,21 @@ int Dungeon::move_pc(int direction){
   int h_dir = ((direction - 1) % 3) - 1;
   row += v_dir;
   col += h_dir;
-  if(map[row][col] != 0) return -1;
   attron(COLOR_PAIR(WHITE_PAIR));
+  for(int i = 0; i < monsters.size(); i++){
+    if(monsters[i].row == row && monsters[i].col == col && !monsters[i].dead()){
+      if(fight(i, true)){
+	mvaddch(row, col, background[row][col]); //monster is dead, remove from map
+      }
+      attroff(COLOR_PAIR(WHITE_PAIR));
+      refresh();
+      return 0;
+    }
+  }
+  if(map[row][col] != 0) return -1;
   mvaddch(pc.row, pc.col, background[pc.row][pc.col]); //remove player from the map
   pc.row = row;
   pc.col = col;
-  //unalive the monsters
-  for(int i = 0; i < monsters.size(); i++){
-    if(monsters[i].row == row && monsters[i].col == col){
-      kill_monster(i); //FATALITY
-      //soon enough this comment will turn into a combat command
-    }
-  }
   generate_paths(); //generate paths for new PC location
   mvaddch(row, col, '@'); //add pc on map again
   attroff(COLOR_PAIR(WHITE_PAIR));
@@ -221,9 +224,18 @@ int Dungeon::pc_turn(){
     else if(key == 'q' || key == 'Q') return -1;
     if(direction > 0){
       if(move_pc(direction) == 0){
-	update_status_text("");
+	//update_status_text("");
 	return 0;
       } else update_status_text("   You cannot move inside a wall.");
     }
   }
+}
+
+int Player::calcSpeed(){
+  int s = speed;
+  for(int i = 0; i < 12; i++){
+    if(equip[i].isNull()) continue;
+    s += equip[i].speed;
+  }
+  return s;
 }
