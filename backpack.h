@@ -304,3 +304,101 @@ void Dungeon::wear_item(){
   refresh();
 }
   
+void Dungeon::takeoff_item(){
+  WINDOW *list = newwin(14, 50, 3, 15);
+  wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
+  mvwprintw(list, 0, 17, "[ Take Off Item ]");
+  for(int i = 0; i < 12; i++){
+    const char *type;
+    switch(i){
+    case 0:
+      type = "Weapon";
+      break;
+    case 1:
+      type = "Offhand";
+      break;
+    case 2:
+      type = "Ranged";
+      break;
+    case 3:
+      type = "Armor";
+      break;
+    case 4:
+      type = "Helmet";
+      break;
+    case 5:
+      type = "Cloak";
+      break;
+    case 6:
+      type = "Gloves";
+      break;
+    case 7:
+      type = "Boots";
+      break;
+    case 8:
+      type = "Amulet";
+      break;
+    case 9:
+      type = "Light";
+      break;
+    case 10:
+    case 11:
+      type = "Ring";
+      break;
+    default:
+      type = "Underwear?"; //this should never happen
+    }
+    mvwprintw(list, i + 1, 1, "%s (%c) - (empty)", type, i + 97);
+    if(pc.equip[i].isNull()) continue; //inventory slot is empty
+    short desc_pos = strlen(type) + 8;
+    wattron(list, COLOR_PAIR(pc.equip[i].src->color));
+    mvwaddch(list, i + 1, desc_pos, pc.equip[i].src->symbol);
+    wattroff(list, COLOR_PAIR(pc.equip[i].src->color));
+    mvwprintw(list, i + 1, desc_pos + 1, ", %s", pc.equip[i].src->name.c_str());
+  }
+  wrefresh(list);
+  int ch = getch();
+  while(ch != 27 && !(ch >= 97 && ch <= 108)) ch = getch();
+  if(ch != 27){
+    //check if there is equipment to take off
+    short eq_slot = ch - 97;
+    if(pc.equip[eq_slot].isNull()){
+      update_status_text("   Given slot is empty!");
+      wclear(list);
+      wrefresh(list);
+      delwin(list);
+      print_map();
+      refresh();
+      return;
+    }
+    //find carry slot
+    signed short inv_slot = -1;
+    for(int i = 0; i < 10; i++){
+      if(!pc.carry[i].isNull()) continue;
+      inv_slot = i;
+      break;
+    }
+    if(inv_slot < 0) {
+      update_status_text("   No open carry slots!");
+      wclear(list);
+      wrefresh(list);
+      delwin(list);
+      print_map();
+      refresh();
+      return;
+    }
+    pc.carry[inv_slot] = pc.equip[eq_slot];
+    pc.equip[eq_slot] = NULL_ITEM;
+    string status_text = "   \'";
+    status_text.append(pc.carry[inv_slot].src->name);
+    status_text.append("\' was taken off into slot ");
+    status_text.append(to_string(inv_slot));
+    status_text.append(".");
+    update_status_text(status_text.c_str());
+  }
+  wclear(list);
+  wrefresh(list);
+  delwin(list);
+  print_map();
+  refresh();
+} 

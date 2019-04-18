@@ -192,7 +192,7 @@ int Dungeon::pc_turn(){
 	print_fog();
       }
     }
-    else if(key == 't'){
+    else if(key == 'g'){
       teleport();
       return 0;
     }
@@ -201,6 +201,7 @@ int Dungeon::pc_turn(){
     else if(key == 'L') look_at_monster();
     else if(key == ',') pickup_items();
     else if(key == 'w') wear_item();
+    else if(key == 't') takeoff_item();
     else if(key == 'q' || key == 'Q') return -1;
     if(direction > 0){
       if(move_pc(direction) == 0){
