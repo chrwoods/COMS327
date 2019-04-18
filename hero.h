@@ -103,7 +103,7 @@ void Dungeon::teleport(){
   print_map();
 }
 
-void Dungeon::look_at_monster(){
+void Dungeon::look_at_something(bool target_is_item){
   print_map();
   int screen[HEIGHT][WIDTH];
   for(int i = 0; i < HEIGHT; i++){
@@ -133,14 +133,26 @@ void Dungeon::look_at_monster(){
 	continue;
       }
       bool looked = false;
-      for(int i = 0; i < monsters.size(); i++){
-	if(dest.row != monsters[i].row || dest.col != monsters[i].col) continue;
-	if(monsters[i].dead()) continue;
-        display_monster_info(i);
+      if(!target_is_item){
+	for(int i = 0; i < monsters.size(); i++){
+	  if(dest.row != monsters[i].row || dest.col != monsters[i].col) continue;
+	  if(monsters[i].dead()) continue;
+	  display_monster_info(i);
+	  looked = true;
+	}
 	mvaddch(dest.row, dest.col, '*');
-	looked = true;
+	if(!looked) update_status_text("   No monster found to look at.");      
+	//else break;
+      } else {
+	for(int i = 0; i < items.size(); i++){
+	  if(dest.row != items[i].row || dest.col != items[i].col) continue;
+	  display_item_info(i);
+	  looked = true;
+	}
+	mvaddch(dest.row, dest.col, '*');
+	if(!looked) update_status_text("   No item found to look at.");
+	//else break;
       }
-      if(!looked) update_status_text("   No monster found to look at.");
     } else if(direction != 0){
       update_status_text("");
       int v_dir = 1 - ((direction - 1) / 3);
@@ -198,12 +210,14 @@ int Dungeon::pc_turn(){
     }
     else if(key == 'i') print_inventory();
     else if(key == 'e') print_equipment();
-    else if(key == 'L') look_at_monster();
+    else if(key == 'L') look_at_something(false);
     else if(key == ',') pickup_items();
     else if(key == 'w') wear_item();
     else if(key == 't') takeoff_item();
     else if(key == 'd') drop_item();
     else if(key == 'x') destroy_item();
+    else if(key == 'O') look_at_something(true); //look at an item similarly to look at a monster
+    else if(key == 'I') inspect_item();
     else if(key == 'q' || key == 'Q') return -1;
     if(direction > 0){
       if(move_pc(direction) == 0){

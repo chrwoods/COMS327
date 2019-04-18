@@ -380,7 +380,7 @@ class Dungeon {
   int use_staircase(char stair);
   int pc_turn();
   void teleport();
-  void look_at_monster();
+  void look_at_something(bool target_is_item);
   
   //from loader.h
   int load_monsters(string filepath);
@@ -401,4 +401,6 @@ class Dungeon {
   void takeoff_item();
   void drop_item();
   void destroy_item();
+  void display_item_info(int num);
+  void inspect_item();
 };

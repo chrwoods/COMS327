@@ -351,13 +351,13 @@ void Dungeon::takeoff_item(){
     default:
       type = "Underwear?"; //this should never happen
     }
-    mvwprintw(list, i + 2, 1, "%s (%c) - (empty)", type, i + 97);
+    mvwprintw(list, i + 1, 2, "%s (%c) - (empty)", type, i + 97);
     if(pc.equip[i].isNull()) continue; //inventory slot is empty
-    short desc_pos = strlen(type) + 8;
+    short desc_pos = strlen(type) + 9;
     wattron(list, COLOR_PAIR(pc.equip[i].src->color));
-    mvwaddch(list, i + 2, desc_pos, pc.equip[i].src->symbol);
+    mvwaddch(list, i + 1, desc_pos, pc.equip[i].src->symbol);
     wattroff(list, COLOR_PAIR(pc.equip[i].src->color));
-    mvwprintw(list, i + 2, desc_pos + 1, ", %s", pc.equip[i].src->name.c_str());
+    mvwprintw(list, i + 1, desc_pos + 1, ", %s", pc.equip[i].src->name.c_str());
   }
   wrefresh(list);
   int ch = getch();
@@ -514,7 +514,7 @@ void Dungeon::display_item_info(int num){
     mvwprintw(list, 2 + ++offset, 1, desc_line.c_str());
     desc = desc.substr(desc.find_first_of("\n") + 1);
   }
-  mvwprintw(list, offset + 4, 1, "HIT BONUS: %d, DAMAGE BONUS: %s, DODGE BONUS: %d", items[num].hit, items[num].src->damage.toString(), items[num].dodge);
+  mvwprintw(list, offset + 4, 1, "HIT BONUS: %d, DAMAGE BONUS: %s, DODGE BONUS: %d", items[num].hit, items[num].src->damage.toString().c_str(), items[num].dodge);
   mvwprintw(list, offset + 5, 1, "DEFENSE BONUS: %d, WEIGHT: %d, SPEED BONUS: %d", items[num].def, items[num].weight, items[num].speed);
   mvwprintw(list, offset + 6, 1, "SPECIAL ATTRIBUTE: %d, VALUE: %d", items[num].attr, items[num].value);
   char vert[6] = "north";
@@ -543,3 +543,78 @@ void Dungeon::display_item_info(int num){
   refresh();
 }
   
+void Dungeon::inspect_item(){
+  bool empty = true;
+  for(int i = 0; i < 10; i++){
+    if(!pc.carry[i].isNull()){
+      empty = false;
+      break;
+    }
+  }
+  if(empty){
+    update_status_text("   Inventory is empty, nothing to inspect.");
+    refresh();
+    return;
+  }
+  update_status_text("   Which inventory slot? (0-9)");
+  refresh();
+  int num = -1;
+  while(1){
+    int ch = getch();
+    if(ch == 27){
+      update_status_text("");
+      refresh();
+      return;
+    } else if (!(ch >= 48 && ch <= 57)) continue;
+    if(pc.carry[ch - 48].isNull()){
+      update_status_text("   Given slot is empty, please choose another slot.");
+      refresh();
+      continue;
+    }
+    num = ch - 48;
+    break;
+  }
+  update_status_text("");
+  refresh();
+  WINDOW *list = newwin(15, 80, 4, 0);
+  wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
+  mvwprintw(list, 0, 36, "[ Item ]");
+  mvwprintw(list, 1, 1, "x - %s, %s", pc.carry[num].src->name.c_str(), pc.carry[num].src->type.c_str());
+  wattron(list, COLOR_PAIR(pc.carry[num].src->color));
+  mvwaddch(list, 1, 1, pc.carry[num].src->symbol);
+  wattroff(list, COLOR_PAIR(pc.carry[num].src->color));
+  string desc = pc.carry[num].src->desc;
+  short offset = 0;
+  while(desc.length() > 1){
+    string desc_line = desc.substr(0, desc.find_first_of("\n"));
+    mvwprintw(list, 2 + ++offset, 1, desc_line.c_str());
+    desc = desc.substr(desc.find_first_of("\n") + 1);
+  }
+  mvwprintw(list, offset + 4, 1, "HIT BONUS: %d, DAMAGE BONUS: %s, DODGE BONUS: %d", pc.carry[num].hit, pc.carry[num].src->damage.toString().c_str(), pc.carry[num].dodge);
+  mvwprintw(list, offset + 5, 1, "DEFENSE BONUS: %d, WEIGHT: %d, SPEED BONUS: %d", pc.carry[num].def, pc.carry[num].weight, pc.carry[num].speed);
+  mvwprintw(list, offset + 6, 1, "SPECIAL ATTRIBUTE: %d, VALUE: %d", pc.carry[num].attr, pc.carry[num].value);
+  char vert[6] = "north";
+  char horz[5] = "east";
+  int v_dist = pc.row - pc.carry[num].row;
+  int h_dist = pc.carry[num].col - pc.col;
+  if(v_dist < 0) {
+    v_dist *= -1;
+    vert[0] = 's';
+    vert[2] = 'u';
+  }
+  if(h_dist < 0) {
+    h_dist *= -1;
+    horz[0] = 'w';
+    horz[1] = 'e';
+  }
+  mvwprintw(list, offset + 8, 1, "DISTANCE: %d (%d %s, %d %s)", max(abs(pc.carry[num].row - pc.row), abs(pc.carry[num].col - pc.col)), v_dist, vert, h_dist, horz);
+  wrefresh(list);
+  while(getch() != 27){
+    //wait until escape character
+  }
+  wclear(list);
+  wrefresh(list);
+  delwin(list);
+  print_map();
+  refresh();
+}
