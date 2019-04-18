@@ -105,7 +105,7 @@ int main(int argc, char *argv[]){
   int gamestate = 0;
   PQueue q(sizeof(int));
   int negative1 = -1; //don't laugh at this line please
-  q.add(&negative1, floor(1000/PC_SPEED));
+  q.add(&negative1, floor(1000/rlg.pc.calcSpeed()));
   for(int i = 0; i < rlg.monsters.size(); i++){
     int speed = (rlg.monsters[i].speed);
     q.add(&i, floor(1000/speed));
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]){
 	usleep(1000000); //let the player bask in their own glory
 	break;
       }
-      q.add(&num, turn + 1000/PC_SPEED);
+      q.add(&num, turn + 1000/rlg.pc.calcSpeed());
     } else {
       q.add(&num, turn + 1000/(rlg.monsters[num].speed));
     }
