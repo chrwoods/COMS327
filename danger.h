@@ -256,7 +256,7 @@ void Dungeon::print_monster_list(){
     
 void Dungeon::display_monster_info(int num){
   if(num < 0 || num >= monsters.size()) return;
-  WINDOW *list = newwin(17, 80, 2, 0);
+  WINDOW *list = newwin(24, 80, 0, 0);
   wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
   mvwprintw(list, 1, 1, "x - %s", monsters[num].src->name.c_str());
   wattron(list, COLOR_PAIR(monsters[num].src->colors[0]));
