@@ -1,4 +1,7 @@
 int Dungeon::move_pc(int direction){
+  //clear combat spot
+  mvprintw(22, 0, "                                                                               ");
+  update_status_text("");
   if(direction == 5) return 0;
   uint8_t row = pc.row;
   uint8_t col = pc.col;
@@ -41,6 +44,7 @@ int Dungeon::use_staircase(char stair){
   for(int i = 0; i < num_mons; i++) generate_monster();
   items.clear();
   for(int i = 0; i < num_items; i++) generate_item();
+  update_background();
   print_map();
   return 0;
 }
