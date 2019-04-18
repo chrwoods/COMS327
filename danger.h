@@ -279,7 +279,7 @@ void Dungeon::print_monster_list(){
   int alive_monsters = 0;
   int monster_array_locs[monsters.size()];
   for(int i = 0; i < monsters.size(); i++){
-    if(monsters[i].hp != 0) monster_array_locs[alive_monsters++] = i;
+    if(!monsters[i].dead()) monster_array_locs[alive_monsters++] = i;
   }
   int page = 0;
   int num_pages = alive_monsters / 6 + (alive_monsters % 6 > 0);
@@ -454,12 +454,21 @@ bool Dungeon::fight(int num, bool player_attacking){ //return true if defending 
     } else {
       status_text.append(" damage, killing it!");
     }
-    update_status_text(status_text.c_str());
+    //update_status_text(status_text.c_str());
+    mvprintw(22, 0, "                                                                      ");
+    mvprintw(22, 0, status_text.c_str());
     refresh();
     if(monsters[num].hp <= 0) return true;
     return false;
   } else {
     int damage = monsters[num].src->damage.roll();
+    //calculate player defense
+    int defense = 0;
+    for(int i = 1; i < 12; i++){
+      if(pc.equip[i].isNull()) continue;
+      defense += pc.equip[i].def;
+    }
+    damage = max(damage - defense, 0);
     pc.hp -= damage;
     string status_text = "   ";
     if(monsters[num].src->unique()) status_text.append("A ");
