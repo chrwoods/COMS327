@@ -29,7 +29,7 @@ using namespace std;
 #define MON_DESTROY 64
 #define MON_UNIQ 128
 #define MON_BOSS 256
-#define DEFAULT_ITEMS 10
+#define DEFAULT_ITEMS 20
 
 class Room {
  public:
