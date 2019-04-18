@@ -436,18 +436,38 @@ bool Dungeon::fight(int num, bool player_attacking){ //return true if defending 
       damage += pc.equip[i].src->damage.roll();
     }
     monsters[num].hp -= damage;
+    string status_text = "   You hit ";
+    if(!monsters[num].src->unique()) status_text.append("the ");
+    status_text.append(monsters[num].src->name);
+    status_text.append(" for ");
+    status_text.append(to_string(damage));
+    if(monsters[num].hp > 0){
+      status_text.append(" damage, leaving them at ");
+      status_text.append(to_string(monsters[num].hp));
+      status_text.append(" HP.");
+    } else {
+      status_text.append(" damage, killing it!");
+    }
+    update_status_text(status_text.c_str());
+    refresh();
     if(monsters[num].hp <= 0) return true;
     return false;
   } else {
     int damage = monsters[num].src->damage.roll();
     pc.hp -= damage;
-    string status_text = "   A \'";
+    string status_text = "   ";
+    if(monsters[num].src->unique()) status_text.append("A ");
     status_text.append(monsters[num].src->name);
-    status_text.append("\' hits you for ");
+    status_text.append(" hits you for ");
     status_text.append(to_string(damage));
-    status_text.append(" damage. Current HP: ");
-    status_text.append(to_string(pc.hp));
+    if(pc.hp > 0){
+      status_text.append(" damage. Current HP: ");
+      status_text.append(to_string(pc.hp));
+    } else {
+      status_text.append(" damage, killing you!");
+    }
     update_status_text(status_text.c_str());
+    refresh();
     if(pc.hp <= 0) return true;
     return false;
   }
