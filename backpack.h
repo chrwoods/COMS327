@@ -497,3 +497,49 @@ void Dungeon::destroy_item(){
   print_map();
   refresh();
 }
+
+void Dungeon::display_item_info(int num){
+  if(num < 0 || num >= items.size()) return;
+  WINDOW *list = newwin(15, 80, 4, 0);
+  wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
+  mvwprintw(list, 0, 36, "[ Item ]");
+  mvwprintw(list, 1, 1, "x - %s, %s", items[num].src->name.c_str(), items[num].src->type.c_str());
+  wattron(list, COLOR_PAIR(items[num].src->color));
+  mvwaddch(list, 1, 1, items[num].src->symbol);
+  wattroff(list, COLOR_PAIR(items[num].src->color));
+  string desc = items[num].src->desc;
+  short offset = 0;
+  while(desc.length() > 1){
+    string desc_line = desc.substr(0, desc.find_first_of("\n"));
+    mvwprintw(list, 2 + ++offset, 1, desc_line.c_str());
+    desc = desc.substr(desc.find_first_of("\n") + 1);
+  }
+  mvwprintw(list, offset + 4, 1, "HIT BONUS: %d, DAMAGE BONUS: %s, DODGE BONUS: %d", items[num].hit, items[num].src->damage.toString(), items[num].dodge);
+  mvwprintw(list, offset + 5, 1, "DEFENSE BONUS: %d, WEIGHT: %d, SPEED BONUS: %d", items[num].def, items[num].weight, items[num].speed);
+  mvwprintw(list, offset + 6, 1, "SPECIAL ATTRIBUTE: %d, VALUE: %d", items[num].attr, items[num].value);
+  char vert[6] = "north";
+  char horz[5] = "east";
+  int v_dist = pc.row - items[num].row;
+  int h_dist = items[num].col - pc.col;
+  if(v_dist < 0) {
+    v_dist *= -1;
+    vert[0] = 's';
+    vert[2] = 'u';
+  }
+  if(h_dist < 0) {
+    h_dist *= -1;
+    horz[0] = 'w';
+    horz[1] = 'e';
+  }
+  mvwprintw(list, offset + 8, 1, "DISTANCE: %d (%d %s, %d %s)", max(abs(items[num].row - pc.row), abs(items[num].col - pc.col)), v_dist, vert, h_dist, horz);
+  wrefresh(list);
+  while(getch() != 27){
+    //wait until escape character
+  }
+  wclear(list);
+  wrefresh(list);
+  delwin(list);
+  print_map();
+  refresh();
+}
+  
