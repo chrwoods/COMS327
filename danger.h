@@ -232,9 +232,11 @@ int Dungeon::move_monster(int num){
 	//move monster
 	monsters[i].row += v;
 	monsters[i].col += h;
-	attron(COLOR_PAIR(monsters[i].src->colors[0]));
-	mvaddch(row + v, col + h, monsters[i].src->symbol);
-	attroff(COLOR_PAIR(monsters[i].src->colors[0]));
+	if(!fog || visible[row + v][col + h]) {
+	  attron(COLOR_PAIR(monsters[i].src->colors[0]));
+	  mvaddch(row + v, col + h, monsters[i].src->symbol);
+	  attroff(COLOR_PAIR(monsters[i].src->colors[0]));
+	}
       }
     }
   }
@@ -328,6 +330,7 @@ void Dungeon::display_monster_info(int num){
   if(num < 0 || num >= monsters.size()) return;
   WINDOW *list = newwin(24, 80, 0, 0);
   wborder(list, '|', '|', '-', '-', '+', '+', '+', '+');
+  mvwprintw(list, 0, 34, "[ Monster ]");
   mvwprintw(list, 1, 1, "x - %s", monsters[num].src->name.c_str());
   wattron(list, COLOR_PAIR(monsters[num].src->colors[0]));
   mvwaddch(list, 1, 1, monsters[num].src->symbol);
